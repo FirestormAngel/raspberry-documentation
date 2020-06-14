@@ -73,15 +73,29 @@ I have based my Raspberry Pi wifi router image on the Raspbian Buster Lite versi
 
 Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation**, [here](https://www.raspberrypi.org/downloads/raspberry-pi-os/).
 
+Open a console and prepare your image file to be written to the SD card.
 ```bash
 $ sudo apt-get update
 $ sudo apt-get install dcfldd gunzip
 ```
 Note: you can use the **dd** command, I just like the progress indicator of **dcfldd**.
 
+Go to the Downloads folder
+```bash
+$ cd Downloads
+$ ls -l
+total 16469060
+...
+-rw-r--r-- 1 pi pi  452715448 jun 14 10:08  2020-05-27-raspios-buster-lite-armhf.zip
+...
+```
+
 Verify the sha256 hash, like so, and verify the red text output in the console.
 ```bash
 $ sha256sum 2020-05-27-raspios-buster-lite-armhf.zip | grep f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
+...
+f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64  2020-05-27-raspios-buster-lite-armhf.zip
+...
 ```
 
 Extract the image with the gunzip command.
