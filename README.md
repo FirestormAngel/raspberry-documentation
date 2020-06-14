@@ -54,11 +54,11 @@ Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation
 
 Verify the sha256 hash, like so, and verify the red text output in the console.
 ```bash
-sha256sum 2020-05-27-raspios-buster-lite-armhf.zip | grep f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
+$ sha256sum 2020-05-27-raspios-buster-lite-armhf.zip | grep f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
 ```
 Extract the image with the gunzip command.
 ```bash
-gunzip 2020-05-27-raspios-buster-lite-armhf.zip
+$ gunzip 2020-05-27-raspios-buster-lite-armhf.zip
 ```
 
 
@@ -76,7 +76,7 @@ In this section we will assign static IPv4 addresses on your raspbian. If you ha
 **Advice**: If you work with this device remotely, make sure you are entering the correct information, and that you are able to connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
 
 ```bash
-sudo nano /etc/dhcpcd.conf
+$ sudo nano /etc/dhcpcd.conf
 ```
 And add/modify the the eth0 static section:
 ```bash
@@ -103,7 +103,7 @@ Since your raspberry doesnt have a physical clock, its important to have it sync
 Ok, you don't really have to change the *timesynccd* service, because it comes preinstalled on Debian Buster, however it is a good idea to have knowledge about this service existance, and that you don't need to install the ntp service. The NTP service which in turn will open port UDP/123, opening a footprint for traffic towards your Raspberry. The ntp service is complicated to secure, so unless you know how, don't use it.
 
 ```bash
-sudo nano /etc/systemd/timesyncd.conf
+$ sudo nano /etc/systemd/timesyncd.conf
 ```
 Example: I've made an example if you want to choose your own NTP servers.
 ```configuration
@@ -129,13 +129,38 @@ PollIntervalMaxSec=2048
 ```
 Note: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds.
 
-Check the status the **systemd-timesyncd** service.
+Example: Check if the time is synchronized.
 ```bash
-systemctl status systemd-timesyncd
+$ timedatectl status
 ```
-Restart the **systemd-timesyncd** service.
+Will output something like:
 ```bash
-systemctl restart systemd-timesyncd
+
+               Local time: sön 2020-06-14 10:44:44 UTC
+           Universal time: sön 2020-06-14 10:44:44 UTC
+                 RTC time: n/a
+                Time zone: Etc/UTC (UTC, +0000)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+```
+Example: Turning NTP on or off.
+```bash
+$ sudo timedatectl set-ntp false
+$ sudo timedatectl set-ntp true
+```
+Example: Set timezone example.
+```bash
+$ sudo timedatectl set-timezone Europe/Paris
+$ sudo timedatectl set-timezone Australia/Sydney
+```
+Example: Check the status the **systemd-timesyncd** service.
+```bash
+$ systemctl status systemd-timesyncd
+```
+Example: Restart the **systemd-timesyncd** service.
+```bash
+$ systemctl restart systemd-timesyncd
 ```
 
 ### Chapter 0x05: Installing and configuring components for RSyslog
