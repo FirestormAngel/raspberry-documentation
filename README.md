@@ -1,4 +1,4 @@
-# raspberry-documentation
+# Raspberry-Documentation (release date 2020-07-01)
 Official release date for the most basic installation instructions will be official here on 2020-07-01.
 Scripts and automation will come at a later date, when its more mature.
 
@@ -37,10 +37,24 @@ I strongly urge you to **not** put this device directly on the Internet, unless 
 ### Chapter 0x00: Hardware and Requirements
 in progress
 
+* 1 Raspberry Pi 4, 4GB RAM.
+* 2 SD Cards, 32GB.
+* 1 Network Cable.
+* 1 Network cable port, available on your switch, router, firewall or transit network.
 
 
 ### Chapter 0x01: Installing the raspberry SD card
-in progress
+in progress, and subject to change
+
+I have based my WiFi router image on the Raspbian Buster Lite version, but I'm pretty sure Raspberry Pi OS will work the same way as the previous versions. This will be tested extensively before the official release date 2020-07-01. At the time of writing this is not tested.
+
+Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation**, [here](https://www.raspberrypi.org/downloads/raspberry-pi-os/).
+
+Verify the sha256 hash, like so, and verify the red text output in the console.
+```bash
+sha256sum 2020-05-27-raspios-buster-lite-armhf.zip | grep f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
+```
+
 
 
 
@@ -105,7 +119,7 @@ Example: I've made an example if you want to choose your own NTP servers.
 NTP=ntp3.sptime.se ntp4.sptime.se
 #FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org
 #RootDistanceMaxSec=5
-PollIntervalMinSec=32
+PollIntervalMinSec=64
 PollIntervalMaxSec=2048
 ```
 Note: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds.
