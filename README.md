@@ -4,6 +4,8 @@ Scripts and automation will come at a later date, when its more mature.
 
 Raspberry Pi 4 is a very capable little creditcard sized computer with a 4 Core ARM CPU. It comes with different boards, sizing 1GB, 2GB, 4GB and 8GB RAM. I have, for the most basic things in my test and online systems, always chosen the 4GB model. Do not underestimate, these applications require both memory and CPU. Running it on Raspberry Pi 2, 3, 3B+, yes, it can be installed but will most likely fail or not perform well. Trust me, I've tried it already, I've been working on this for years.
 
+It should also be said, most of these chapters will come with extensive explanations, why and why not to do things. You might be able to follow if you are an intermediate to advanced user familiar with linux bash and configuration.
+
 ## This will probably work on all Raspberry Pi 4 models.
 * Chapter 0x00: Hardware and Requirements
 * Chapter 0x01: Installing the raspberry SD card
