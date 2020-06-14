@@ -40,12 +40,13 @@ I strongly urge you to **not** put this device directly on the Internet, unless 
 in progress, and subject to change
 
 * 1 Raspberry Pi 4, 4GB RAM or higher.
+* 1 Raspberry Pi 4, power adapter with USB-C, 5V/3A.
 * 2 SD Cards, 32GB.
 * 1 USB 3.0 SD card reader.
 * 1 Network Cable.
 * 1 Network cable port, available on your switch, router, firewall or transit network.
 
-You need to find out what network you are on.
+Instruction here.
 
 
 ### Chapter 0x01: Installing the raspberry SD card
@@ -55,7 +56,7 @@ in progress, and the instruction is subject to change
 
 in progress, and the instruction is subject to change
 
-* [Instruction video here].
+* [Instruction here].
 
 
 **Instruction here on installing image from a Raspberry system**
@@ -64,7 +65,7 @@ I'm currently working on a Raspberry Pi with a Desktop, this is why the SD card 
 
 I have based my Raspberry Pi wifi router image on the Raspbian Buster Lite version, but I'm pretty sure Raspberry Pi OS Buster version will work the same way as the previous versions. This will be tested extensively before the official release date 2020-07-01. At the time of this writing, this OS has not been tested.
 
-* [Instruction video here].
+* [Instruction here].
 
 Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation**, [here](https://www.raspberrypi.org/downloads/raspberry-pi-os/).
 
@@ -72,6 +73,7 @@ Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation
 $ sudo apt-get update
 $ sudo apt-get install dcfldd gunzip
 ```
+Note: you can use the **dd** command, I just like the progress indicator of **dcfldd**.
 
 Verify the sha256 hash, like so, and verify the red text output in the console.
 ```bash
@@ -110,7 +112,7 @@ $ dmesg
 ```
 The last 2 lines contain a SD card and its partitions detected, in this case **sdb** (disk), **sdb1** (partition1) and **sdb2**  (partition2), because this is a raspberry card. Your output might be different, it might be **sda** or **sdb**.
 
-To overwrite the SD card **sdb** with your new raspberry image. Please do note the warning, **This will indeed delete all previous contents of your SD card**, make sure its the correct one.
+To overwrite the SD card **sdb** with your new raspberry image. Please do note the warning, **This will indeed delete all previous contents of your SD card**, make sure its the correct card in your reader.
 ```bash
 $ sudo dcfldd if=2020-05-27-raspios-buster-lite-armhf.img of=/dev/sdb bs=4M
 ```
@@ -120,6 +122,7 @@ $ sudo dcfldd if=2020-05-27-raspios-buster-lite-armhf.img of=/dev/sdb bs=4M
 ### Chapter 0x02: Update the Debian Buster image file
 in progress
 
+* Instruction on making a preconfigured Golden-Image.
 
 
 ### Chapter 0x03: Configuring IP addresses on eth0 and wlan0
@@ -127,7 +130,7 @@ in prgress, also subject to change
 
 In this section we will assign static IPv4 addresses on your raspbian. If you have other networks you should assign them to the configuration below, and use the correct network and subnetmask for your network. I will however be consistent here, most people with a little knowledge do understand that if you work with this system remotely, you will be disconnected and will need to reconnect to the device, while restarting the service.
 
-* *Advice*: If you work with this device remotely, make sure you are entering the correct information, and that you are able to connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
+* **Advice**: If you work with this device remotely, make sure you are entering the correct information, and that you are able to connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
 
 ```bash
 $ sudo nano /etc/dhcpcd.conf
