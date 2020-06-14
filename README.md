@@ -26,5 +26,5 @@ It should also be said, most of these chapters will come with extensive explanat
 NOTE:
 Most of these components already exist and comes via the very well version managed Debian Buster repository. It should be somewhat safe to use, however I have had experiences of opensource software suddenly stopped working due to version handling and kernel differences. This may happen, and in such cases it might take time to get the problems fixed. If possible then dont update the firmware versions on your raspberry on your own, let them come with the repository updates. 
 
-
+I also publish this information because I care about your safety, I expect you to use this extensive knowledge wisely and not maliciously. If you find problems or detect security issues, don't hesitate to inform me. I expect you to do that.
 
