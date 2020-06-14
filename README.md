@@ -258,7 +258,7 @@ Example: Restart the **systemd-timesyncd** service.
 ```bash
 $ systemctl restart systemd-timesyncd
 ```
-* Thankyou for reading this section, this will help you in our later sections during logging, evidence and negotiating ipsec and prevent you from getting errors later when we use transport layer security with certificates. They will depend on you completing this section.
+Thankyou for reading this section, this will help you in our later sections during logging, evidence and negotiating ipsec and prevent you from getting errors later when we use transport layer security with certificates. They will depend on you completing this section.
 
 
 ### Chapter 0x05: Installing and configuring components for RSyslog
