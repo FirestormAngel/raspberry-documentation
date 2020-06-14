@@ -16,11 +16,13 @@ It should also be said, most of these chapters will come with extensive explanat
 * Chapter 0x06: Installing and configuring components for Wifi 802.11ac
 * Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
 * Chapter 0x08: Installing and configuring components for IPSec, iptables
+* Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network.
 
 ### This will probably work on the 4GB and 8GB Raspberry Pi 4 models. (later release date)
-* Chapter 0x09: Hardware and Requirements
-* Chapter 0x0A: Installing and configuring components for Docker (repo and installation)
-* Chapter 0x0B: Installing and configuring components for Python3 environments.
+* Chapter 0x0A: Hardware and Requirements
+* Chapter 0x0B: Installing and configuring components for Docker (repo and installation)
+* Chapter 0x0C: Installing and configuring components for Python3 environments.
+* Chapter 0x0D: Installing and configuring WASP pcap recorder.
 * More chapters in the pipe.
 
 NOTE:
@@ -39,6 +41,7 @@ in progress, and subject to change
 
 * 1 Raspberry Pi 4, 4GB RAM or higher.
 * 2 SD Cards, 32GB.
+* 1 USB 3.0 SD card reader.
 * 1 Network Cable.
 * 1 Network cable port, available on your switch, router, firewall or transit network.
 
@@ -48,7 +51,7 @@ You need to find out what network you are on.
 ### Chapter 0x01: Installing the raspberry SD card
 in progress, and subject to change
 
-I have based my Raspberry Pi wifi router image on the Raspbian Buster Lite version, but I'm pretty sure Raspberry Pi OS will work the same way as the previous versions. This will be tested extensively before the official release date 2020-07-01. At the time of writing, this OS has not been tested.
+I have based my Raspberry Pi wifi router image on the Raspbian Buster Lite version, but I'm pretty sure Raspberry Pi OS Buster version will work the same way as the previous versions. This will be tested extensively before the official release date 2020-07-01. At the time of this writing, this OS has not been tested.
 
 Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation**, [here](https://www.raspberrypi.org/downloads/raspberry-pi-os/).
 
@@ -59,6 +62,38 @@ $ sha256sum 2020-05-27-raspios-buster-lite-armhf.zip | grep f5786604be4b41e292c5
 Extract the image with the gunzip command.
 ```bash
 $ gunzip 2020-05-27-raspios-buster-lite-armhf.zip
+```
+
+Insert your USB 3.0 SD card reader, and run the following command.
+```bash
+$ dmesg
+```
+```bash
+...
+[18217.822017] usb 2-1: new SuperSpeed Gen 1 USB device number 2 using xhci_hcd
+[18217.881582] usb 2-1: New USB device found, idVendor=0bda, idProduct=0326, bcdDevice=11.24
+[18217.881598] usb 2-1: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[18217.881611] usb 2-1: Product: USB3.0 Card Reader
+[18217.881623] usb 2-1: Manufacturer: Realtek
+[18217.881635] usb 2-1: SerialNumber: 201404081410
+[18217.899942] usb-storage 2-1:1.0: USB Mass Storage device detected
+[18217.901303] scsi host0: usb-storage 2-1:1.0
+[18218.991413] scsi 0:0:0:0: Direct-Access     Generic- USB3.0 CRW   -SD 1.00 PQ: 0 ANSI: 6
+[18219.003925] scsi 0:0:0:1: Direct-Access     Generic- USB3.0 CRW   -SD 1.00 PQ: 0 ANSI: 6
+[18219.006767] sd 0:0:0:0: [sda] Attached SCSI removable disk
+[18219.014432] sd 0:0:0:1: [sdb] Attached SCSI removable disk
+[18219.022467] sd 0:0:0:0: Attached scsi generic sg0 type 0
+[18219.022666] sd 0:0:0:1: Attached scsi generic sg1 type 0
+...
+
+```
+
+
+
+
+To write the image to your empty SD card (Warning! will delete the contents of your card, make sure its the correct one)
+```bash
+$ dcfldd if=2020-05-27-raspios-buster-lite-armhf.img of=/dev/sda bs=4M
 ```
 
 
@@ -73,7 +108,7 @@ in prgress, also subject to change
 
 In this section we will assign static IPv4 addresses on your raspbian. If you have other networks you should assign them to the configuration below, and use the correct network and subnetmask for your network. I will however be consistent here, most people with a little knowledge do understand that if you work with this system remotely, you will be disconnected and will need to reconnect to the device, while restarting the service.
 
-**Advice**: If you work with this device remotely, make sure you are entering the correct information, and that you are able to connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
+* *Advice*: If you work with this device remotely, make sure you are entering the correct information, and that you are able to connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
 
 ```bash
 $ sudo nano /etc/dhcpcd.conf
@@ -127,9 +162,9 @@ NTP=ntp3.sptime.se ntp4.sptime.se
 PollIntervalMinSec=64
 PollIntervalMaxSec=2048
 ```
-* *Advice*: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds. This is recommended.
+* **Advice**: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds. This is recommended.
 
-* *Advice*: The *PollIntervalMinSec* and *PollIntervalMaxSec* is the interval frame between sending ntp requests to the destinations. A value below 64 seconds is *not* recommended, unless you wish to be *blacklisted* on the ntp providers. *So, don't go below 64 seconds*.
+* **Advice**: The *PollIntervalMinSec* and *PollIntervalMaxSec* is the interval frame between sending ntp requests to the destinations. A value below 64 seconds is *not* recommended, unless you wish to be *blacklisted* on the ntp providers. *So, don't go below 64 seconds*.
 
 
 Example: Check if the time is synchronized.
@@ -175,7 +210,7 @@ Example: Restart the **systemd-timesyncd** service.
 ```bash
 $ systemctl restart systemd-timesyncd
 ```
-Thankyou for reading this section, this will help you in our later sections during logging, evidence and negotiating ipsec and prevent you from getting errors later when we use transport layer security with certificates. They will depend on you completing this section.
+* Thankyou for reading this section, this will help you in our later sections during logging, evidence and negotiating ipsec and prevent you from getting errors later when we use transport layer security with certificates. They will depend on you completing this section.
 
 
 ### Chapter 0x05: Installing and configuring components for RSyslog
