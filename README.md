@@ -127,7 +127,10 @@ NTP=ntp3.sptime.se ntp4.sptime.se
 PollIntervalMinSec=64
 PollIntervalMaxSec=2048
 ```
-Note: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds.
+* *Advice*: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds. This is recommended.
+
+* *Advice* The *PollIntervalMinSec* and *PollIntervalMaxSec* is the interval between sending ntp requests to the destinations. A value below 64 seconds is *not* recommended, unless you wish to be *blacklisted* on the ntp servers. *So, don't go below 64 seconds*.
+
 
 Example: Check if the time is synchronized.
 ```bash
@@ -144,14 +147,25 @@ System clock synchronized: yes
               NTP service: active
           RTC in local TZ: no
 ```
+
 Example: Turning NTP on or off.
 ```bash
 $ sudo timedatectl set-ntp false
 $ sudo timedatectl set-ntp true
 ```
-Example: Set timezone example.
+
+Example: List available timezone specifications.
+```bash
+$ timedatectl list-timezones
+$ timedatectl list-timezones | grep America
+$ timedatectl list-timezones | grep Sydney
+$ timedatectl list-timezones | grep Europe
+```
+
+Example: Set timezone examples.
 ```bash
 $ sudo timedatectl set-timezone Europe/Paris
+$ sudo timedatectl set-timezone Europe/Stockholm
 $ sudo timedatectl set-timezone Australia/Sydney
 ```
 Example: Check the status the **systemd-timesyncd** service.
