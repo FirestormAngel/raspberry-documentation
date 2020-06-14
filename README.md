@@ -35,9 +35,9 @@ I strongly urge you to **not** put this device directly on the Internet, unless 
 # Chapters
 
 ### Chapter 0x00: Hardware and Requirements
-in progress
+in progress, and subject to change
 
-* 1 Raspberry Pi 4, 4GB RAM.
+* 1 Raspberry Pi 4, 4GB RAM or higher.
 * 2 SD Cards, 32GB.
 * 1 Network Cable.
 * 1 Network cable port, available on your switch, router, firewall or transit network.
@@ -129,7 +129,14 @@ PollIntervalMaxSec=2048
 ```
 Note: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds.
 
-
+Check the status the **systemd-timesyncd** service.
+```bash
+systemctl status systemd-timesyncd
+```
+Restart the **systemd-timesyncd** service.
+```bash
+systemctl restart systemd-timesyncd
+```
 
 ### Chapter 0x05: Installing and configuring components for RSyslog
 in progress
