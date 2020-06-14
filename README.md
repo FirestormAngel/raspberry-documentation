@@ -49,16 +49,30 @@ You need to find out what network you are on.
 
 
 ### Chapter 0x01: Installing the raspberry SD card
-in progress, and subject to change
+in progress, and the instruction is subject to change
+
+**Instruction here on installing image from a Windows system**
+
+in progress, and the instruction is subject to change
+
+**Instruction here on installing image from a Raspberry system**
+
+I'm currently working on a Raspberry Pi with a Desktop, this is why the SD card instruction looks like this at the moment. Instructions for Windows will come in a while. But for now, I'm on a raspberry desktop.
 
 I have based my Raspberry Pi wifi router image on the Raspbian Buster Lite version, but I'm pretty sure Raspberry Pi OS Buster version will work the same way as the previous versions. This will be tested extensively before the official release date 2020-07-01. At the time of this writing, this OS has not been tested.
 
 Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation**, [here](https://www.raspberrypi.org/downloads/raspberry-pi-os/).
 
+```bash
+$ sudo apt-get update
+$ sudo apt-get install dcfldd gunzip
+```
+
 Verify the sha256 hash, like so, and verify the red text output in the console.
 ```bash
 $ sha256sum 2020-05-27-raspios-buster-lite-armhf.zip | grep f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
 ```
+
 Extract the image with the gunzip command.
 ```bash
 $ gunzip 2020-05-27-raspios-buster-lite-armhf.zip
@@ -85,15 +99,14 @@ $ dmesg
 [18219.022467] sd 0:0:0:0: Attached scsi generic sg0 type 0
 [18219.022666] sd 0:0:0:1: Attached scsi generic sg1 type 0
 ...
-
+[18380.662439] sd 0:0:0:1: [sdb] 62333952 512-byte logical blocks: (31.9 GB/29.7 GiB)
+[18380.672670]  sdb: sdb1 sdb2
 ```
+**Advice**: the last 2 lines contain a SD card detected, in this case **sdb** (disk), **sdb1** (partition1) and **sdb2**  (partition2), because this is a raspberry card. Your output might be different, it might be **sda** or **sdb**.
 
-
-
-
-To write the image to your empty SD card (Warning! will delete the contents of your card, make sure its the correct one)
+To overwrite the disk **sdb** with your new raspberry image. Please do note the warning, **This will indeed delete all previous contents of your SD card**, make sure its the correct one.
 ```bash
-$ dcfldd if=2020-05-27-raspios-buster-lite-armhf.img of=/dev/sda bs=4M
+$ sudo dcfldd if=2020-05-27-raspios-buster-lite-armhf.img of=/dev/sdb bs=4M
 ```
 
 
