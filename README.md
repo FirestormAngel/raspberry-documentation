@@ -13,16 +13,17 @@ It should also be said, most of these chapters will come with extensive explanat
 * Chapter 0x03: Configuring IP addresses on eth0 and wlan0
 * Chapter 0x04: Synchronizing the time with Network Time Servers
 * Chapter 0x05: Installing and configuring components for RSyslog
-* Chapter 0x06: Installing and configuring components for Wifi 802.11ac
+* Chapter 0x06: Installing and configuring components for Wifi 802.11ac with WPA2-PSK
 * Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
 * Chapter 0x08: Installing and configuring components for IPSec, iptables
-* Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network.
+* Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network
+* Chapter 0x0A: Configuring and securing the SSH server access
 
 ### This will probably work on the 4GB and 8GB Raspberry Pi 4 models. (later release date)
-* Chapter 0x0A: Hardware and Requirements
-* Chapter 0x0B: Installing and configuring components for Docker (repo and installation)
-* Chapter 0x0C: Installing and configuring components for Python3 environments.
-* Chapter 0x0D: Installing and configuring pcap recorder.
+* Chapter 0x0B: Hardware and Requirements
+* Chapter 0x0C: Installing and configuring components for Docker (repo and installation)
+* Chapter 0x0D: Installing and configuring components for Python3 environments.
+* Chapter 0x0E: Installing and configuring pcap recorder.
 * More chapters in the pipe.
 
 ### Set the right expectations
@@ -47,10 +48,13 @@ in progress, and subject to change
 
 * 1 Raspberry Pi 4, 4GB RAM or higher.
 * 1 Raspberry Pi 4, power adapter with USB-C, 5V/3A.
+* 1 GeekWorm Raspberry Pi 4 Armor heatsink.
 * 2 SD Cards, 32GB.
 * 1 USB 3.0 SD card reader.
 * 1 Network Cable.
 * 1 Network cable port, available on your switch, router, firewall or transit network.
+
+Warning! This device will be warm. This device is going to be online most of the day, and carrying a heavy load, so a proper aluminium armor without fan is probably a good idea. Just make sure the heated components are properly attached and leading away the heat from the components. I have had success with the GeekWorm Raspberry Pi 4 Armor Gray, thus leading the cpu at +53C.
 
 
 ### Chapter 0x01: Installing the raspberry SD card
@@ -261,7 +265,7 @@ $ systemctl restart systemd-timesyncd
 in progress
 
 
-### Chapter 0x06: Installing and configuring components for Wifi 802.11ac
+### Chapter 0x06: Installing and configuring components for Wifi 802.11ac with WPA2-PSK
 in progress
 
 
@@ -272,3 +276,10 @@ in progress
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
 in progress
 
+
+### Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network
+in progress
+
+
+### Chapter 0x0A: Configuring and securing the SSH server access
+in progress
