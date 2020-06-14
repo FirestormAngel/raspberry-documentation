@@ -129,14 +129,13 @@ PollIntervalMaxSec=2048
 ```
 * *Advice*: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds. This is recommended.
 
-* *Advice* The *PollIntervalMinSec* and *PollIntervalMaxSec* is the interval between sending ntp requests to the destinations. A value below 64 seconds is *not* recommended, unless you wish to be *blacklisted* on the ntp servers. *So, don't go below 64 seconds*.
+* *Advice*: The *PollIntervalMinSec* and *PollIntervalMaxSec* is the interval frame between sending ntp requests to the destinations. A value below 64 seconds is *not* recommended, unless you wish to be *blacklisted* on the ntp providers. *So, don't go below 64 seconds*.
 
 
 Example: Check if the time is synchronized.
 ```bash
 $ timedatectl status
 ```
-Will output something like:
 ```bash
 
                Local time: sön 2020-06-14 10:44:44 UTC
@@ -148,21 +147,21 @@ System clock synchronized: yes
           RTC in local TZ: no
 ```
 
-Example: Turning NTP on or off.
+Example: Turning NTP on or off. Please do turn it on with *true*.
 ```bash
 $ sudo timedatectl set-ntp false
 $ sudo timedatectl set-ntp true
 ```
 
-Example: List available timezone specifications.
+Example: List available timezones. Grep if you want a shorter list.
 ```bash
 $ timedatectl list-timezones
 $ timedatectl list-timezones | grep America
-$ timedatectl list-timezones | grep Sydney
 $ timedatectl list-timezones | grep Europe
+$ timedatectl list-timezones | grep Australia/Sydney
 ```
 
-Example: Set timezone examples.
+Example: Set timezone.
 ```bash
 $ sudo timedatectl set-timezone Europe/Paris
 $ sudo timedatectl set-timezone Europe/Stockholm
@@ -176,15 +175,20 @@ Example: Restart the **systemd-timesyncd** service.
 ```bash
 $ systemctl restart systemd-timesyncd
 ```
+Thankyou for reading this section, this will help you in our later sections during logging, evidence and negotiating ipsec and prevent you from getting errors later when we use transport layer security with certificates. They will depend on you completing this section.
+
 
 ### Chapter 0x05: Installing and configuring components for RSyslog
 in progress
 
+
 ### Chapter 0x06: Installing and configuring components for Wifi 802.11ac
 in progress
 
+
 ### Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
 in progress
+
 
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
 in progress
