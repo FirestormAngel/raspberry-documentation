@@ -42,11 +42,13 @@ in progress
 * 1 Network Cable.
 * 1 Network cable port, available on your switch, router, firewall or transit network.
 
+You need to find out what network you are on.
+
 
 ### Chapter 0x01: Installing the raspberry SD card
 in progress, and subject to change
 
-I have based my WiFi router image on the Raspbian Buster Lite version, but I'm pretty sure Raspberry Pi OS will work the same way as the previous versions. This will be tested extensively before the official release date 2020-07-01. At the time of writing this is not tested.
+I have based my Raspberry Pi wifi router image on the Raspbian Buster Lite version, but I'm pretty sure Raspberry Pi OS will work the same way as the previous versions. This will be tested extensively before the official release date 2020-07-01. At the time of writing, this OS has not been tested.
 
 Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation**, [here](https://www.raspberrypi.org/downloads/raspberry-pi-os/).
 
@@ -54,7 +56,10 @@ Verify the sha256 hash, like so, and verify the red text output in the console.
 ```bash
 sha256sum 2020-05-27-raspios-buster-lite-armhf.zip | grep f5786604be4b41e292c5b3c711e2efa64b25a5b51869ea8313d58da0b46afc64
 ```
-
+Extract the image with the gunzip command.
+```bash
+gunzip 2020-05-27-raspios-buster-lite-armhf.zip
+```
 
 
 
