@@ -266,11 +266,188 @@ in progress
 
 
 ### Chapter 0x06: Installing and configuring components for Wifi 802.11ac with WPA2-PSK
-in progress
+in progress, also subject to change
+
+In this chapter we are going to install the hostapd, an essential component for making your Raspberry Pi 4 a wifi access point. 
+
+* **Advice** Do note that this step will only enable the wifi and make it start broadcasting its ssid name.
+* **Advice** Chapter 0x07, 0x08 are required to make the access point work.
+
+Update and upgrade your OS, then install the Wifi AccessPoint daemon.
+```bash
+$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get install hostapd -y
+```
+
+Make sure the hostapd.service is stopped.
+```bash
+$ sudo systemctl stop hostapd
+```
+
+Make sure your *hostapd.conf* is pointed out inside */etc/default/hostapd*.
+```bash
+$ sudo nano /etc/default/hostapd
+```
+```bash
+    # Defaults for hostapd initscript
+    #
+    # WARNING: The DAEMON_CONF setting has been deprecated and will be removed
+    #          in future package releases.
+    #
+    # See /usr/share/doc/hostapd/README.Debian for information about alternative
+    # methods of managing hostapd.
+    #
+    # Uncomment and set DAEMON_CONF to the absolute path of a hostapd configuration
+    # file and hostapd will be started during system boot. An example configuration 
+    # file can be found at /usr/share/doc/hostapd/examples/hostapd.conf.gz
+    #
+    #DAEMON_CONF=""
+
+    # Additional daemon options to be appended to hostapd command:-
+    #       -d   show more debug messages (-dd for even more)
+    #       -K   include key data in debug messages
+    #       -t   include timestamps in some debug messages
+    #
+    # Note that -B (daemon mode) and -P (pidfile) options are automatically
+    # configured by the init.d script and must not be added to DAEMON_OPTS.
+    #
+    #DAEMON_OPTS=""
+
+    # yes, enter it here.. even its deprecated.
+    DAEMON_CONF="/etc/hostapd/hostapd.conf"
+
+```
+
+I have made a couple of hostapd configuration examples for you to select from. 
+* **Advice** Please select the one that is most appropriate for you.
+* **Advice** Read up on your documentation for your devices before selecting the one to choose.
+
+```bash
+$ sudo nano /etc/hostapd/hostapd.conf
+```
+
+Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/20Mhz. Recommended for iPhone 6 and upwards.
+```bash
+
+    ########################################
+    ## This configuration will work with  ## 
+    ## newer iPhone models, 6s and newer  ##
+    ## Android phones.                    ##
+    ##                                    ##
+    ## However Smart TV's might not work  ##
+    ## with this as some of them still    ##
+    ## use 802.11b/g/n on the 2.4Ghz      ##
+    ## band.                              ##
+    ##                                    ##
+    ## Check your documentation.          ##
+    ##                                    ##
+    ## This configuration is recommended  ##
+    ## for devices that have VPN          ##
+    ## capability.                        ##
+    ##                                    ##
+    ## Check your documentation.          ##
+    ########################################
+    
+    # attach this hostapd to wlan0 (builtin wireless card)
+    interface=wlan0
+    
+    # always use the nl80211 driver, unless otherwise specified.
+    driver=nl80211
+    
+    # enable the 5Ghz band.
+    hw_mode=a
+    
+    # Channel 36 or 48 is probably your best option for 20/20Mhz band.
+    channel=48
+    
+    # Country Wireless compliance code. (enter your country code: Example GB, US or SE)
+    country_code=SE
+    
+    # Wireless compliance 802.11d (1=enable, 0=disable)
+    ieee80211d=1
+    
+    # Wireless compliance 802.11n (1=enable, 0=disable)
+    ieee80211n=1
+    
+    # Wireless compliance 802.11ac (1=enable, 0=disable)
+    ieee80211ac=1
+    
+    # new variable, untested.
+    #wme_enabled=1
+    
+    # bandwith controller.
+    wmm_enabled=1
+
+    # bandwith controller. 40/40Ghz example. Does not work.
+    # ht_capab=[HT40+][SHORT-GI-80][DSSS_CCK-40]
+
+    # macaddress acl (1=enabled, 0=disabled)
+    macaddr_acl=0
+
+    # hide ssid broadcasts (1=enabled, 0=disabled)
+    ignore_broadcast_ssid=0
+    
+    ########################################
+    ## Wifi settings here                 ##
+    ########################################
+
+    # enter ssid name here, make sure it does not conflict with another accesspoint.
+    ssid=wifi-03.firestorm.org
+    
+    # enable authentication (1=enable, 0=disable)
+    auth_algs=1
+    
+    # enforce wpa2 algorithms. 1=wpa1, 2=wpa2, 3=combinded wpa1 and wpa2 (not recommended)
+    wpa=2
+    
+    # enforce use of pre-shared key.
+    wpa_key_mgmt=WPA-PSK
+    
+    # enforce the CCMP encryption algorithm
+    rsn_pairwise=CCMP
+    
+    # enforce hostapd with your preshared key.
+    wpa_passphrase=<enter your password here. 20-32 characters recommended.>
+    
+```
+
+Enable traffic forwarding from your wlan0 card to eth0 physical network card.
+```bash
+$ sudo nano /etc/sysctl.conf
+```
+
+Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1*.
+```bash
+    net.ipv4.ip_forward=1
+```
+
+Example: Check status of the hostapd.service
+```bash
+$ sudo systemctl status hostapd.service
+```
+
+Example: Start the hostapd.service
+```bash
+$ sudo systemctl start hostapd.service
+```
+
+Example: Stop the hostapd.service
+```bash
+$ sudo systemctl stop hostapd.service
+```
 
 
 ### Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
-in progress
+in progress, subject to change
+
+In this chapter we are going to enable dhcp and dns which will enable your accesspoint to configure your wifi attached devices with the ip addresses they will be using to navigate the wifi network. I'll be using dnsmasq since this probably is the most qualified software for this task. Dnsmasq is widely used in routers and appliances for both dhcp and dns navigation. If you shoud select something, then select dnsmasq. In a few moments you'll understand why.  
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get install dnsmasq -y
+```
 
 
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
