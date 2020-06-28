@@ -270,8 +270,11 @@ in progress, also subject to change
 
 In this chapter we are going to install the hostapd, an essential component for making your Raspberry Pi 4 a wifi access point. 
 
-* **Advice** Do note that this step will only enable the wifi and make it start broadcasting its ssid name.
+* **Advice** This step will only enable the hostapd and make it start broadcasting its ssid name.
 * **Advice** Chapter 0x07, 0x08 are required to make the access point work.
+* **Advice** You will need to disable the wpa_supplicant.service
+
+If you are using your Raspberry Pi 4, wifi to connect to another accesspoint, now is the time to stop doing that.
 
 Update and upgrade your OS, then install the Wifi AccessPoint daemon.
 ```bash
@@ -284,6 +287,16 @@ Make sure the hostapd.service is stopped.
 ```bash
 $ sudo systemctl stop hostapd
 ```
+
+Start by disabling the wpa_supplicant.service, which makes your raspberry a client to an external access point. From now on your raspberry is going to be the access point.
+```bash
+sudo systemclt stop wpa_supplicant.service
+sudo systemctl disable wpa_supplicant.service
+
+# and if you really want to be sure its not used, then..
+sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.old
+```
+
 
 Make sure your *hostapd.conf* is pointed out inside */etc/default/hostapd*.
 ```bash
@@ -359,6 +372,7 @@ Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/
     hw_mode=a
     
     # Channel 36 or 48 is probably your best option for 20/20Mhz band.
+    # Important, if you run multiple Raspberries as accesspoints next to eachother, I urge you to use different channels.
     channel=48
     
     # Country Wireless compliance code. (enter your country code: Example GB, US or SE)
@@ -422,6 +436,12 @@ Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1*.
     net.ipv4.ip_forward=1
 ```
 
+The hostapd is masked, which means you cannot enable it per default. Unmask it and then enable it.
+```bash
+sudo systemctl unmask hostapd
+sudo systemctl enable hostapd
+```
+
 Example: Check status of the hostapd.service
 ```bash
 $ sudo systemctl status hostapd.service
@@ -443,10 +463,77 @@ in progress, subject to change
 
 In this chapter we are going to enable dhcp and dns which will enable your accesspoint to configure your wifi attached devices with the ip addresses they will be using to navigate the wifi network. I'll be using dnsmasq since this probably is the most qualified software for this task. Dnsmasq is widely used in routers and appliances for both dhcp and dns navigation. If you shoud select something, then select dnsmasq. In a few moments you'll understand why.  
 
+update, upgrade and install dnsmasq
 ```bash
 $ sudo apt-get update
 $ sudo apt-get upgrade
 $ sudo apt-get install dnsmasq -y
+```
+```bash
+sudo systemctl stop dnsmasq
+sudo systemctl stop hostapd
+```
+
+Rename the dnsmasq.conf and start a new file.
+```bash
+sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+```
+
+Create a new dnsmasq.conf
+```bash
+sudo nano /etc/dnsmasq.conf
+```
+
+Add the following entries.
+```bash
+    local=/localnet/
+
+    # exmple on howto re-route ntp dns requests to another network time protocol server.
+    #address=/ntp.org/193.11.166.2
+    #address=/time-ios.apple.com/193.11.166.2
+
+    addn-hosts=/etc/dnsmasq/hostile_hosts
+
+    expand-hosts
+    domain=internal.firestorm.org
+    domain=wifi.firestorm.org,192.168.230.0/24
+    # we havent added docker yet, but this entry would be correct.
+    #domain=docker.firestorm.org,172.17.0.0/16
+
+    # listen for DNS request on these addresses.
+    listen-address=192.168.230.254
+    listen-address=192.168.220.30
+    # we havent added docker yet, but this entry would be correct.
+    #listen-address=172.17.0.1
+    listen-address=127.0.0.1
+
+    # no dhcp responses on eth0
+    no-dhcp-interface=eth0
+    # we havent added docker yet, but this entry would be correct.
+    #no-dhcp-interface=docker0
+
+    # dhcp wifi network
+    dhcp-range=192.168.230.10,192.168.230.30,255.255.255.0,6h
+    dhcp-option=option:ntp-server,193.11.166.2,193.11.166.18
+    dhcp-option=option:dns-server,192.168.230.254
+    dhcp-option=option:domain-search,wifi.firestorm.org
+    # make wpad behave on wifi.
+    dhcp-option=252,"\n"
+    # authorative dhcp on wifi network.
+    dhcp-authoritative
+    
+    # example, you can add your own command to run when a client requests a dhcp entry.
+    dhcp-script=/bin/echo
+
+    srv-host=_ipp._tcp,printer.internal.firestorm.org,631
+    srv-host=_raw._tcp,printer.internal.firestorm.org,9100
+    txt-record=_http._tcp.printer.internal.firestorm.org,name=value,paper=A4
+
+    log-queries
+    log-dhcp
+
+    conf-dir=/etc/dnsmasq.d/,*.conf
+
 ```
 
 
