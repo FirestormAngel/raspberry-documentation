@@ -80,7 +80,7 @@ Download the **Raspberry Pi OS (32-bit) Lite** from **The Rasberry Pi foundation
 Open a console and prepare your image file to be written to the SD card.
 ```bash
 $ sudo apt-get update
-$ sudo apt-get install dcfldd gunzip
+$ sudo apt-get install dcfldd gunzip dnsutils tcpdump nmap -y
 ```
 Note: you can use the **dd** command, I just like the progress indicator of **dcfldd**.
 
@@ -494,6 +494,9 @@ Add the following entries.
 
     addn-hosts=/etc/dnsmasq/hostile_hosts
 
+    # exmpand-hosts adds the appropriate domain specified below to your devices
+    # when retreiving dhcp addresses from dnsmasq.
+    
     expand-hosts
     domain=internal.firestorm.org
     domain=wifi.firestorm.org,192.168.230.0/24
@@ -552,6 +555,32 @@ $ sudo nano /etc/dnsmasq/hostile_hosts
 
 ```
 
+Add static dns records for your dnsmasq installation.
+```bash
+$ sudo nano /etc/hosts
+```
+
+```bash
+    # leave this section unchanged.
+    127.0.0.1       localhost
+    ::1             localhost ip6-localhost ip6-loopback
+    ff02::1         ip6-allnodes
+    ff02::2         ip6-allrouters
+
+    # example: 127.0.1.1 should refer to your specific raspberry pi hostname.
+    # in my case, my raspberry name is firestorm-cataclystic-0003.
+    127.0.1.1       firestorm-cataclystic-0003
+    
+    # ip address, see /etc/dhcpcd.conf for wifi network card configuration.
+    192.168.230.254 firestorm-cataclystic-0003.wifi.firestorm.org
+   
+    # ip address, see /etc/dhcpcd.conf for physical network card configuration.
+    192.168.220.30  firestorm-cataclystic-0003.internal.firestorm.org
+    
+    # we havent added docker yet, but this entry would be correct.
+    #172.17.0.1      gate.docker.firestorm.org
+
+```
 
 
 
