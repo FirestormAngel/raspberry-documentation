@@ -461,27 +461,27 @@ $ sudo systemctl stop hostapd.service
 ### Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
 in progress, subject to change
 
-In this chapter we are going to enable dhcp and dns which will enable your accesspoint to configure your wifi attached devices with the ip addresses they will be using to navigate the wifi network. I'll be using dnsmasq since this probably is the most qualified software for this task. Dnsmasq is widely used in routers and appliances for both dhcp and dns navigation. If you shoud select something, then select dnsmasq. In a few moments you'll understand why.  
+In this chapter we are going to enable dhcp and dns which will enable your accesspoint to configure your wifi attached devices with the ip addresses they will be using to navigate the wifi network. I'll be using dnsmasq since this probably is the most qualified software for this task. Dnsmasq is widely used in routers and appliances for both dhcp and dns navigation. If you shoud select something, then select dnsmasq. In a few moments you'll understand why.
+
+I'm repeating the installation of dnsutils, tcpdump, nmap, because you will need them later in this chapter.
 
 update, upgrade and install dnsmasq
 ```bash
 $ sudo apt-get update
 $ sudo apt-get upgrade
-$ sudo apt-get install dnsmasq -y
+$ sudo apt-get install dnsmasq dnsutils tcpdump nmap -y
 ```
 ```bash
-sudo systemctl stop dnsmasq
-sudo systemctl stop hostapd
-```
-
-Rename the dnsmasq.conf and start a new file.
-```bash
-sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+$ sudo systemctl stop dnsmasq
+$ sudo systemctl stop hostapd
 ```
 
-Create a new dnsmasq.conf
+Rename the dnsmasq.conf to old and start a new dnsmasq.conf file.
 ```bash
-sudo nano /etc/dnsmasq.conf
+$ sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+```
+```bash
+$ sudo nano /etc/dnsmasq.conf
 ```
 
 Add the following entries.
@@ -535,6 +535,24 @@ Add the following entries.
     conf-dir=/etc/dnsmasq.d/,*.conf
 
 ```
+
+```bash
+$ sudo mkdir /etc/dnsmasq/
+$ sudo nano /etc/dnsmasq/hostile_hosts
+```
+
+```bash
+    ########################################
+    ## HOSTILE                            ##
+    ########################################
+
+    # redirector examples
+    # redirect url of choice to ip of choice
+    127.0.0.1   *.hostile-web-server.com
+
+```
+
+
 
 
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
