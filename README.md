@@ -1,5 +1,5 @@
-# Raspberry-Documentation (release date 2020-07-01)
-Official release date for the most basic installation instructions will be official here on 2020-07-01.
+# Raspberry-Documentation (new release date 2020-09-01)
+Official release date for the most basic installation instructions will be official here on 2020-09-01.
 Scripts and automation will come at a later date, when its more mature.
 
 Raspberry Pi 4 is a very capable little creditcard sized computer with a 4 Core ARM CPU. It comes with different boards, sizing 1GB, 2GB, 4GB and 8GB RAM. I have, for the most basic things in my test and online systems, always chosen the 4GB model and a 32GB SD card. Do not underestimate, these applications require both memory and CPU. Running it on Raspberry Pi 2, 3, 3B+, yes, it can be installed but will most likely fail or not perform well. Trust me, I've tried it already, I've been working on this for years.
