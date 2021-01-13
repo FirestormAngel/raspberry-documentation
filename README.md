@@ -1,4 +1,4 @@
-# Raspberry-Documentation (new release date 2020-09-01)
+# Raspberry-Documentation (new release date 2021-02-01)
 Official release date for the most basic installation instructions will be official here on 2020-09-01.
 Scripts and automation will come at a later date, when its more mature.
 
@@ -23,7 +23,9 @@ It should also be said, most of these chapters will come with extensive explanat
 * Chapter 0x0B: Hardware and Requirements
 * Chapter 0x0C: Installing and configuring components for Docker (repo and installation)
 * Chapter 0x0D: Installing and configuring components for Python3 environments.
-* Chapter 0x0E: Installing and configuring pcap recorder.
+* Chapter 0x0E: Installing and configuring pcap recorder (2021-05-01)
+* Chapter 0x0F: Configuration of Python environment (2021-05-01)
+* Chapter 0x10: Configuration of Python environment for plugins for wifi-triangulation (2021-06-01)
 * More chapters in the pipe.
 
 ### Set the right expectations
@@ -594,3 +596,28 @@ in progress
 
 ### Chapter 0x0A: Configuring and securing the SSH server access
 in progress
+
+
+### Chapter 0x0B: Hardware and Requirements
+in progress
+
+
+### Chapter 0x0C: Installing and configuring components for Docker (repo and installation)
+in progress
+
+
+### Chapter 0x0D: Installing and configuring components for Python3 environments (2021-05-01)
+in progress
+
+
+### Chapter 0x0E: Installing and configuring pcap recorder (2021-05-01)
+in progress
+
+
+### Chapter 0x0F: Configuration of Python environment (2021-05-01)
+in progress
+
+
+### Chapter 0x10: Configuration of Python environment for plugins for wifi-triangulation (2021-06-01)
+in progress
+
