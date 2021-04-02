@@ -1,5 +1,5 @@
-# Raspberry-Documentation (new release date 2021-02-01)
-Official release date for the most basic installation instructions will be official here on 2020-09-01.
+# Raspberry-Documentation
+Official release date for the most basic installation instructions will be official here.
 Scripts and automation will come at a later date, when its more mature.
 
 Raspberry Pi 4 is a very capable little creditcard sized computer with a 4 Core ARM CPU. It comes with different boards, sizing 1GB, 2GB, 4GB and 8GB RAM. I have, for the most basic things in my test and online systems, always chosen the 4GB model and a 32GB SD card. Do not underestimate, these applications require both memory and CPU. Running it on Raspberry Pi 2, 3, 3B+, yes, it can be installed but will most likely fail or not perform well. Trust me, I've tried it already, I've been working on this for years.
@@ -414,7 +414,7 @@ Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/
     # enable authentication (1=enable, 0=disable)
     auth_algs=1
     
-    # enforce wpa2 algorithms. 1=wpa1, 2=wpa2, 3=combinded wpa1 and wpa2 (not recommended)
+    # enforce wpa2 algorithms. 1=wpa1, 2=wpa2, 3=combined wpa1 and wpa2 (not recommended)
     wpa=2
     
     # enforce use of pre-shared key.
@@ -587,7 +587,121 @@ $ sudo nano /etc/hosts
 
 
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
-in progress
+in progress, subject to change
+
+Install the StrongSwan IPSec packages.
+```bash
+$ sudo apt-get install strongswan -y
+```
+
+Example: Configure the default IPSec settings
+```bash
+$ sudo nano /etc/ipsec.conf
+```
+
+```bash
+    # ipsec.conf - strongSwan IPsec configuration file
+
+    # basic configuration
+
+    config setup
+        # strictcrlpolicy=yes
+        # uniqueids = no
+
+    conn %default
+
+        # lifetime
+        lifetime=12h
+        dpddelay=30s
+        dpdtimeout=120s
+        dpdaction=restart
+
+        ikelifetime=60m
+        keylife=20m
+        rekeymargin=3m
+        keyingtries=1
+        keyexchange=ikev2
+        mobike=yes
+        authby=secret
+        reauth=no
+
+    conn vpnserver-dhcpclients
+
+        # self config
+        left=192.168.230.254
+        leftid=wifi-03@wifi.firestorm.org
+        leftsubnet=0.0.0.0/0
+        leftfirewall=yes
+
+        # clients config
+        right=%any
+        rightid=*@wifi.firestorm.org
+        rightsourceip=192.168.231.0/24
+        rightdns=172.17.0.1
+        rightupdown=/bin/echo
+        auto=add
+
+    include /var/lib/strongswan/ipsec.conf.inc
+```
+
+Example: Add your IPSec device for preshared-key tunnel on the wifi-network.
+```bash
+$ sudo nano /etc/ipsec.secrets
+```
+
+```bash
+    # This file holds shared secrets or RSA private keys for authentication.
+
+    # RSA private key for this host, authenticating it to any other host
+    # which knows the public part.
+
+    # EXAMPLE: yourdevice
+    yourdevice@wifi.firestorm.org : PSK YourSuperLongPasswordHere
+```
+NOTE: your device is required to present itself as something@wifi.firestorm.org, with this configuration. If it doesn't, it won't authenticate and the tunnel will not be negotiated. In my configuration example of the dnsmasq service, the dhcp will add this extension to your device when it gets a dhcp address, thus you should use the same fqdn name as specified in the dnsmasq service. 
+
+Example: Check status of the ipsec.service
+```bash
+$ sudo systemctl status ipsec.service
+```
+
+Example: Start the ipsec.service
+```bash
+$ sudo systemctl start ipsec.service
+```
+
+Example: Stop the ipsec.service
+```bash
+$ sudo systemctl stop ipsec.service
+```
+```bash
+$ sudo ipsec statusall
+    Status of IKE charon daemon (strongSwan 5.7.2, Linux 5.10.17-v7l+, armv7l):
+      uptime: 13 days, since Mar 19 19:05:06 2021
+      malloc: sbrk 2760704, mmap 0, used 907056, free 1853648
+      worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 3
+      loaded plugins: charon aes rc2 sha2 sha1 md5 mgf1 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp dnskey sshkey pem openssl           fips-prf gmp agent xcbc hmac gcm attr kernel-netlink resolve socket-default connmark stroke updown counters
+    Virtual IP pools (size/online/offline):
+      192.168.231.0/24: 254/1/1
+    Listening IP addresses:
+      192.168.220.30
+      192.168.230.254
+      172.17.0.1
+    Connections:
+    vpnserver-dhcpclients:  192.168.230.254...%any  IKEv2, dpddelay=30s
+    vpnserver-dhcpclients:   local:  [wifi-03@wifi.firestorm.org] uses pre-shared key authentication
+    vpnserver-dhcpclients:   remote: [*@wifi.firestorm.org] uses pre-shared key authentication
+    vpnserver-dhcpclients:   child:  0.0.0.0/0 === dynamic TUNNEL, dpdaction=restart
+    Security Associations (1 up, 0 connecting):
+    vpnserver-dhcpclients[402]: ESTABLISHED 24 minutes ago, 192.168.230.254[wifi-03@wifi.firestorm.org]...192.168.230.15[JM-6s-Plus@wifi.firestorm.org]
+    vpnserver-dhcpclients[402]: IKEv2 SPIs: e37ebeff3870b2c6_i f76ce6da4ebbcdf9_r*, rekeying in 30 minutes
+    vpnserver-dhcpclients[402]: IKE proposal: AES_CBC_256/HMAC_SHA2_256_128/PRF_HMAC_SHA2_256/MODP_2048
+    vpnserver-dhcpclients{1923}:  INSTALLED, TUNNEL, reqid 41, ESP SPIs: c693110e_i 08f45c7a_o
+    vpnserver-dhcpclients{1923}:  AES_CBC_256/HMAC_SHA2_256_128, 12652 bytes_i (81 pkts, 52s ago), 26505 bytes_o (69 pkts, 52s ago), rekeying in 11 hours
+    vpnserver-dhcpclients{1923}:   0.0.0.0/0 === 192.168.231.1/32
+```
+
+
 
 
 ### Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network
