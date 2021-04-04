@@ -58,6 +58,8 @@ in progress, and subject to change
 
 Warning! This device will be warm. This device is going to be online most of the day, and carrying a heavy load, so a proper aluminium armor without fan is probably a good idea. Just make sure the heated components are properly attached and leading away the heat from the components. I have had success with the GeekWorm Raspberry Pi 4 Armor Gray, thus leading the cpu at +53C.
 
+![Raspberry PI with GeekWorm Armor](images/raspberrypi_with_armor.JPG)
+
 
 ### Chapter 0x01: Installing the raspberry SD card
 in progress, and the instruction is subject to change
