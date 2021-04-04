@@ -292,15 +292,17 @@ $ sudo systemctl stop hostapd
 
 Start by disabling the wpa_supplicant.service, which makes your raspberry a client to an external access point. From now on your raspberry is going to be the access point.
 ```bash
-sudo systemclt stop wpa_supplicant.service
-sudo systemctl disable wpa_supplicant.service
+$ sudo systemclt stop wpa_supplicant.service
+$ sudo systemctl disable wpa_supplicant.service
+```
 
-# and if you really want to be sure its not used, then..
-sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.old
+And if you really want to be sure its not used, then..
+```bash
+$ sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.old
 ```
 
 
-Make sure your *hostapd.conf* is pointed out inside */etc/default/hostapd*.
+Make sure your *hostapd.conf* is pointed out inside the file */etc/default/hostapd*.
 ```bash
 $ sudo nano /etc/default/hostapd
 ```
@@ -428,20 +430,23 @@ Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/
     
 ```
 
+
 Enable traffic forwarding from your wlan0 card to eth0 physical network card.
 ```bash
 $ sudo nano /etc/sysctl.conf
 ```
+
 
 Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1*.
 ```bash
     net.ipv4.ip_forward=1
 ```
 
+
 The hostapd is masked, which means you cannot enable it per default. Unmask it and then enable it.
 ```bash
-sudo systemctl unmask hostapd
-sudo systemctl enable hostapd
+$ sudo systemctl unmask hostapd
+$ sudo systemctl enable hostapd
 ```
 
 Example: Check status of the hostapd.service
@@ -641,7 +646,8 @@ $ sudo nano /etc/ipsec.conf
         # when ipsec connected, use this ipv4 pool inside the raspberry.
         rightsourceip=192.168.231.0/24
         # when ipsec connected, use this dns server
-        rightdns=172.17.0.1
+        rightdns=192.168.230.254
+        #rightdns=172.17.0.1
         rightupdown=/bin/echo
         auto=add
 
@@ -662,16 +668,52 @@ $ sudo nano /etc/ipsec.secrets
     # EXAMPLE: yourdevice
     yourdevice@wifi.firestorm.org : PSK YourSuperLongPasswordHere
 ```
+To prevent future problems with implicit deny iptables, which we will enable later, here are some things to prepare.
 
-The above configuration will work flawlessly when installing on a vanilla kernel, however it might stop working when updating the raspberry kernel with a apt-get upgrade command it might prevent strongswan to create the needed ipsec rules in your iptables list. To make this work, somewhat flawlessly, even with a updated kernel, you need to enable the netlink traffic selector.
+IMPORTANT; The above configured ipsec configuration will work flawlessly with iptables when installing strongswan on a vanilla raspberry-kernel; however it will definately stop working when updating the raspberry kernel to new versions. Obviously there is some compiled or hardwired relation between the strongswan version and the iptables netlink kernel driver.
 
-The following commands will help the strongswan ipsec service to still work the traffic selector. 
+To make this work, also with an updated kernel, you will need to enable the sharon kernel-netlink and socket-default traffic selectors.
 
-Enable the kernel-netlink iptables fwmark and load for the automatic iptables selector rules to be created when negotiating with ipsec. 
+* Step 1: Enable the socket-default fwmark and load the socket selector.
+* Step 2: Enable the kernel-netlink iptables negated fwmark and load iptables selector rules.
+* Step 3: Enable the ipsec peer traffic selector for iptables selector rules to be created when negotiating ipsec.
+
+Lets get started
+
+Step 1: Enable the socket-default fwmark and load the socket selector. 
+```bash
+$ sudo nano /etc/strongswan.d/charon/socket-default.conf
+```
+```bash
+socket-default {
+
+    # Firewall mark to set on outbound packets.
+    fwmark = 0x4
+
+    # Whether to load the plugin. Can also be an integer to increase the
+    # priority of this plugin.
+    load = yes
+
+    # Set source address on outbound packets, if possible.
+    # set_source = yes
+
+    # Force sending interface on outbound packets, if possible.
+    # set_sourceif = no
+
+    # Listen on IPv4, if possible.
+    # use_ipv4 = yes
+
+    # Listen on IPv6, if possible.
+    # use_ipv6 = yes
+
+}
+```
+
+
+Step 2: Enable the kernel-netlink iptables negated fwmark and load iptables selector rules. 
 ```bash
 $ sudo nano /etc/strongswan.d/charon/kernel-netlink.conf
 ```
-
 ```bash
 kernel-netlink {
 
@@ -761,7 +803,7 @@ kernel-netlink {
 }
 ```
 
-Enable the ipsec peer traffic selector for the automatic iptables selector rules to be created when negotiating ipsec.
+Step 3: Enable the ipsec peer traffic selector for iptables selector rules to be created when negotiating ipsec.
 ```bash
 $ sudo nano /etc/strongswan.d/charon/kernel-libipsec.conf
 ```
@@ -772,34 +814,7 @@ kernel-libipsec {
 }
 ```
 
-Enable the socket-default fwmark and load for the automatic iptables selector rules to be created when negotiating ipsec. 
-```bash
-$ sudo nano /etc/strongswan.d/charon/socket-default.conf
-```
-```bash
-socket-default {
 
-    # Firewall mark to set on outbound packets.
-    fwmark = 0x4
-
-    # Whether to load the plugin. Can also be an integer to increase the
-    # priority of this plugin.
-    load = yes
-
-    # Set source address on outbound packets, if possible.
-    # set_source = yes
-
-    # Force sending interface on outbound packets, if possible.
-    # set_sourceif = no
-
-    # Listen on IPv4, if possible.
-    # use_ipv4 = yes
-
-    # Listen on IPv6, if possible.
-    # use_ipv6 = yes
-
-}
-```
 
 
 
