@@ -594,7 +594,7 @@ Install the StrongSwan IPSec packages.
 $ sudo apt-get install strongswan -y
 ```
 
-Example: Configure the default IPSec settings
+Example 1: Configure the default IPSec settings with preshared-key
 ```bash
 $ sudo nano /etc/ipsec.conf
 ```
@@ -634,9 +634,13 @@ $ sudo nano /etc/ipsec.conf
         leftfirewall=yes
 
         # clients config
+        # any client can start negotiating.
         right=%any
+        # all clients need to present themselfs as something@wifi.firestorm.org
         rightid=*@wifi.firestorm.org
+        # when ipsec connected, use this ipv4 pool inside the raspberry.
         rightsourceip=192.168.231.0/24
+        # when ipsec connected, use this dns server
         rightdns=172.17.0.1
         rightupdown=/bin/echo
         auto=add
@@ -644,7 +648,7 @@ $ sudo nano /etc/ipsec.conf
     include /var/lib/strongswan/ipsec.conf.inc
 ```
 
-Example: Add your IPSec device for preshared-key tunnel on the wifi-network.
+Example 1: Add your IPSec device for preshared-key tunnel on the wifi-network.
 ```bash
 $ sudo nano /etc/ipsec.secrets
 ```
@@ -658,25 +662,183 @@ $ sudo nano /etc/ipsec.secrets
     # EXAMPLE: yourdevice
     yourdevice@wifi.firestorm.org : PSK YourSuperLongPasswordHere
 ```
-NOTE: your device is required to present itself as something@wifi.firestorm.org, with this configuration. If it doesn't, it won't authenticate and the tunnel will not be negotiated. In my configuration example of the dnsmasq service, the dhcp will add this extension to your device when it gets a dhcp address, thus you should use the same fqdn name as specified in the dnsmasq service. 
 
-Example: Check status of the ipsec.service
+The above configuration will work flawlessly when installing on a vanilla kernel, however it might stop working when updating the raspberry kernel with a apt-get upgrade command it might prevent strongswan to create the needed ipsec rules in your iptables list. To make this work, somewhat flawlessly, even with a updated kernel, you need to enable the netlink traffic selector.
+
+The following commands will help the strongswan ipsec service to still work the traffic selector. 
+
+Enable the kernel-netlink iptables fwmark and load for the automatic iptables selector rules to be created when negotiating with ipsec. 
 ```bash
-$ sudo systemctl status ipsec.service
+$ sudo nano /etc/strongswan.d/charon/kernel-netlink.conf
 ```
 
-Example: Start the ipsec.service
+```bash
+kernel-netlink {
+
+    # Buffer size for received Netlink messages.
+    # buflen = <min(PAGE_SIZE, 8192)>
+
+    # Force maximum Netlink receive buffer on Netlink socket.
+    # force_receive_buffer_size = no
+
+    # Firewall mark to set on the routing rule that directs traffic to our
+    # routing table.
+    fwmark = !0x4
+
+    # Whether to ignore errors potentially resulting from a retransmission.
+    # ignore_retransmit_errors = no
+
+    # Whether to load the plugin. Can also be an integer to increase the
+    # priority of this plugin.
+    load = yes
+
+    # MSS to set on installed routes, 0 to disable.
+    # mss = 0
+
+    # MTU to set on installed routes, 0 to disable.
+    # mtu = 0
+
+    # Whether to perform concurrent Netlink ROUTE queries on a single socket.
+    # parallel_route = no
+
+    # Whether to perform concurrent Netlink XFRM queries on a single socket.
+    # parallel_xfrm = no
+
+    # Whether to always use XFRM_MSG_UPDPOLICY to install policies.
+    # policy_update = no
+
+    # Whether to use port or socket based IKE XFRM bypass policies.
+    # port_bypass = no
+
+    # Whether to process changes in routing rules to trigger roam events.
+    # process_rules = no
+
+    # Maximum Netlink socket receive buffer in bytes.
+    # receive_buffer_size = 0
+
+    # Number of Netlink message retransmissions to send on timeout.
+    # retries = 0
+
+    # Whether to trigger roam events when interfaces, addresses or routes
+    # change.
+    # roam_events = yes
+
+    # Whether to set protocol and ports in the selector installed on transport
+    # mode IPsec SAs in the kernel.
+    # set_proto_port_transport_sa = no
+
+    # Netlink message retransmission timeout, 0 to disable retransmissions.
+    # timeout = 0
+
+    # Lifetime of XFRM acquire state and allocated SPIs in kernel.
+    # xfrm_acq_expires = 165
+
+    # XFRM policy hashing threshold configuration for IPv4 and IPv6.
+    spdh_thresh {
+
+        ipv4 {
+
+            # Local subnet XFRM policy hashing threshold for IPv4.
+            # lbits = 32
+
+            # Remote subnet XFRM policy hashing threshold for IPv4.
+            # rbits = 32
+
+        }
+
+        ipv6 {
+
+            # Local subnet XFRM policy hashing threshold for IPv6.
+            # lbits = 128
+
+            # Remote subnet XFRM policy hashing threshold for IPv6.
+            # rbits = 128
+
+        }
+
+    }
+
+}
+```
+
+Enable the ipsec peer traffic selector for the automatic iptables selector rules to be created when negotiating ipsec.
+```bash
+$ sudo nano /etc/strongswan.d/charon/kernel-libipsec.conf
+```
+```bash
+kernel-libipsec {
+  # allow peer traffic selector
+  allow_peer_ts = yes
+}
+```
+
+Enable the socket-default fwmark and load for the automatic iptables selector rules to be created when negotiating ipsec. 
+```bash
+$ sudo nano /etc/strongswan.d/charon/socket-default.conf
+```
+```bash
+socket-default {
+
+    # Firewall mark to set on outbound packets.
+    fwmark = 0x4
+
+    # Whether to load the plugin. Can also be an integer to increase the
+    # priority of this plugin.
+    load = yes
+
+    # Set source address on outbound packets, if possible.
+    # set_source = yes
+
+    # Force sending interface on outbound packets, if possible.
+    # set_sourceif = no
+
+    # Listen on IPv4, if possible.
+    # use_ipv4 = yes
+
+    # Listen on IPv6, if possible.
+    # use_ipv6 = yes
+
+}
+```
+
+
+
+
+
+Here are some commands to disable, enable, start, stop the ipsec.service
+
+Disable the ipsec.service
+```bash
+$ sudo systemctl disable ipsec.service
+```
+
+Enable the ipsec.service
+```bash
+$ sudo systemctl enable ipsec.service
+```
+
+Stop the ipsec.service
+```bash
+$ sudo systemctl stop ipsec.service
+```
+
+Start the ipsec.service
 ```bash
 $ sudo systemctl start ipsec.service
 ```
 
-Example: Stop the ipsec.service
+Get the status of the ipsec.service
 ```bash
-$ sudo systemctl stop ipsec.service
+$ sudo systemctl status ipsec.service
 ```
+
+Get the status of the ipsec connections made so far
+
 ```bash
 $ sudo ipsec statusall
-    Status of IKE charon daemon (strongSwan 5.7.2, Linux 5.10.17-v7l+, armv7l):
+```
+```bash
+    Status of IKE charon daemon (strongSwan x.x.x, Linux 5.x.x-v7l+, armv7l):
       uptime: 13 days, since Mar 19 19:05:06 2021
       malloc: sbrk 2760704, mmap 0, used 907056, free 1853648
       worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 3
@@ -686,7 +848,6 @@ $ sudo ipsec statusall
     Listening IP addresses:
       192.168.220.30
       192.168.230.254
-      172.17.0.1
     Connections:
     vpnserver-dhcpclients:  192.168.230.254...%any  IKEv2, dpddelay=30s
     vpnserver-dhcpclients:   local:  [wifi-03@wifi.firestorm.org] uses pre-shared key authentication
@@ -700,8 +861,6 @@ $ sudo ipsec statusall
     vpnserver-dhcpclients{1923}:  AES_CBC_256/HMAC_SHA2_256_128, 12652 bytes_i (81 pkts, 52s ago), 26505 bytes_o (69 pkts, 52s ago), rekeying in 11 hours
     vpnserver-dhcpclients{1923}:   0.0.0.0/0 === 192.168.231.1/32
 ```
-
-
 
 
 ### Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network
