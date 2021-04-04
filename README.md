@@ -672,15 +672,15 @@ To prevent future problems with implicit deny iptables, which we will enable lat
 
 IMPORTANT; The above configured ipsec configuration will work flawlessly with iptables when installing strongswan on a vanilla raspberry-kernel; however it will definately stop working when updating the raspberry kernel to new versions. Obviously there is some compiled or hardwired relation between the strongswan version and the iptables netlink kernel driver.
 
-To make this work, also with an updated kernel, you will need to enable the sharon kernel-netlink and socket-default traffic selectors.
+To make this work, also with an updated kernel, you will need to enable the charon kernel-netlink and socket-default traffic selectors.
 
-* Step 1: Enable the socket-default fwmark and load the socket selector.
-* Step 2: Enable the kernel-netlink iptables negated fwmark and load iptables selector rules.
-* Step 3: Enable the ipsec peer traffic selector for iptables selector rules to be created when negotiating ipsec.
+* Step 1: Enable the charon socket-default fwmark and load the socket selector.
+* Step 2: Enable the charon kernel-netlink negated fwmark and load the netlink selector.
+* Step 3: Enable the charon ipsec peer traffic selector for iptables selector rules to be created when negotiating ipsec.
 
 Lets get started
 
-Step 1: Enable the socket-default fwmark and load the socket selector. 
+Step 1: Enable the charon socket-default fwmark and load the socket selector.
 ```bash
 $ sudo nano /etc/strongswan.d/charon/socket-default.conf
 ```
@@ -710,7 +710,7 @@ socket-default {
 ```
 
 
-Step 2: Enable the kernel-netlink iptables negated fwmark and load iptables selector rules. 
+Step 2: Enable the charon kernel-netlink negated fwmark and load the netlink selector.
 ```bash
 $ sudo nano /etc/strongswan.d/charon/kernel-netlink.conf
 ```
@@ -803,7 +803,7 @@ kernel-netlink {
 }
 ```
 
-Step 3: Enable the ipsec peer traffic selector for iptables selector rules to be created when negotiating ipsec.
+Step 3: Enable the charon ipsec peer traffic selector for iptables selector rules to be created when negotiating ipsec.
 ```bash
 $ sudo nano /etc/strongswan.d/charon/kernel-libipsec.conf
 ```
