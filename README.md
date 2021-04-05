@@ -55,6 +55,7 @@ in progress, and subject to change
 * 1 USB 3.0 SD card reader.
 * 1 Network Cable.
 * 1 Network cable port, available on your switch, router, firewall or transit network.
+* 1 USB 3.0 Memorystick, Kingston 64GB or higher. (used for logs and pcap)
 
 Warning! This device will be warm. This device is going to be online most of the day, and carrying a heavy load, so a proper aluminium armor without fan is probably a good idea. Just make sure the heated components are properly attached and leading away the heat from the components. I have had success with the GeekWorm Raspberry Pi 4 Armor Gray, thus leading the cpu at +53C.
 
@@ -973,7 +974,7 @@ $ sudo ipsec statusall
       uptime: 13 days, since Mar 19 19:05:06 2021
       malloc: sbrk 2760704, mmap 0, used 907056, free 1853648
       worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 3
-      loaded plugins: charon aes rc2 sha2 sha1 md5 mgf1 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp dnskey sshkey pem openssl           fips-prf gmp agent xcbc hmac gcm attr kernel-netlink resolve socket-default connmark stroke updown counters
+      loaded plugins: charon aes rc2 sha2 sha1 md5 mgf1 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp dnskey sshkey pem openssl fips-prf gmp agent xcbc hmac gcm attr kernel-netlink resolve socket-default connmark stroke updown counters
     Virtual IP pools (size/online/offline):
       192.168.231.0/24: 254/1/1
     Listening IP addresses:
