@@ -704,6 +704,9 @@ $ sudo iptables -L -v -n
 #### Summary
 The chapters until here has taken you all the way to get your Raspberry Pi up and running as a simple wifi accesspoint. We have added the dnsmasq configuration, with both dns-, dhcp-, hostnames- and some basic iptables configuration. As I wrote, iptables are somewhat complex for beginners, I promise we will be touching the iptables configuration in further chapters. From this point we will be securing the configurations.
 
+![2 Raspberry Pi 4 accesspoints](images/raspberrypi_accesspoints.JPG)
+
+
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
 in progress, subject to change
 
