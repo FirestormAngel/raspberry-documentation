@@ -58,7 +58,7 @@ in progress, and subject to change
 
 Warning! This device will be warm. This device is going to be online most of the day, and carrying a heavy load, so a proper aluminium armor without fan is probably a good idea. Just make sure the heated components are properly attached and leading away the heat from the components. I have had success with the GeekWorm Raspberry Pi 4 Armor Gray, thus leading the cpu at +53C.
 
-![Raspberry PI with GeekWorm Armor](images/raspberrypi_with_armor.JPG =800x600)
+![Raspberry PI with GeekWorm Armor](images/raspberrypi_with_armor.JPG)
 
 
 ### Chapter 0x01: Installing the raspberry SD card
@@ -591,7 +591,118 @@ $ sudo nano /etc/hosts
 
 ```
 
+##### Making a temporary network address translation (NAT) on your raspberry
+One of the more important things left to do now, is to separate the wifi-network (wlan0 192.168.230.0/24) from the transit-network (eth0 192.168.220.0/24). Since this is 2 different subnets we neet to add a network address translation, in network terms referred to as NAT.
 
+This would normally be done by adding a **post routing masquerade** on Linux, yes its still a NAT on the eth0 interface, since this is going to route the wifi traffic out towards the Internet and set the routing tables correctly for packet forwarding between wlan0 and eth0, the best thing to do is to add this on eth0.
+
+Add the following statement on your raspberry to start network address translation
+```bash
+$ sudo iptables -A POSTROUTING -o eth0 -j MASQUERADE
+```
+IMPORTANT; Do note that the above statement is in no way permanent, if you turn the raspberry off or restart it, you will need to add this statement again.
+
+##### Making a permanent network address translation (NAT) on your raspberry
+Networking and iptables on Linux is difficult subject for people who are not familiar with network configurations. In other words this section could work for you, or it could bring you a lot of headache. I'll try to make this as simple and easy as possible and in each chapter from here, add more detail.
+
+* Step 1: Add a iptables configuration file on disk
+* Step 2: Add the permanent statements to the configuration file
+* Step 3: Add the raspberry load the iptables configuration at startup
+* Step 4: Restart the Raspberry Pi and log back in again
+* Step 5: Verify the ip tables configuration
+
+Step 1: Add a iptables configuration file on disk
+
+Step 1.1: Create the configuration file
+```bash
+$ sudo touch /etc/iptables.ipv4.nat
+```
+
+Step 1.2: Add ownership to user root and group root
+```bash
+$ sudo chown root:root /etc/iptables.ipv4.nat
+```
+
+Step 1.3: Set the access rights for root read/write, group read and everyone read
+```bash
+$ sudo chmod 644 /etc/iptables.ipv4.nat
+```
+
+Step 2: Add the permanent statements to the configuration file
+```bash
+$ sudo nano /etc/iptables.ipv4.nat
+```
+```bash
+    *nat
+    :PREROUTING ACCEPT [0:0]
+    :INPUT ACCEPT [0:0]
+    :POSTROUTING ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    
+    # Add a NAT to outbound traffic on the eth0 interface.
+    # This statement is typically what we would write in our 'iptables -A POSTROUTING -o eth0 -j MASQUERADE' statement.
+    -A POSTROUTING -o eth0 -j MASQUERADE
+    
+    # Add a NAT to outbound traffic on the wlan0 interface.
+    # We will talk more about this in the IPSec chapter, but for now comment it out.
+    # This statement is typically what we would write in our 'iptables -A POSTROUTING -o wlan0 -j MASQUERADE' statement.
+    #-A POSTROUTING -o wlan0 -j MASQUERADE
+    
+    # Below command commits the nat statements
+    COMMIT
+
+    *filter
+    :INPUT ACCEPT [0:0]
+    :FORWARD ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    :LOG_ACCEPT - [0:0]
+    :LOG_DROP - [0:0]
+
+    # I have added these statements for future debugging and logging, leave them as is.
+    -A LOG_ACCEPT -j LOG --log-prefix "INPUT:ACCEPT " --log-level 6
+    -A LOG_ACCEPT -j ACCEPT
+    -A LOG_DROP   -j LOG --log-prefix "INPUT:DROP " --log-level 6
+    -A LOG_DROP   -j DROP
+    
+    # Below command commits the filter and access list statements
+    COMMIT
+```
+WARNING; This iptables configuration is permissive to just get you started, please do not connect any of the physical interfaces with this configuration to any unsecured network, such as Internet. This would be a very bad idea. We will touch this subject further, and secure the iptables rules in the upcomming chapters.
+
+* ACCEPT - will allow all traffic.
+* DROP - will drop packages without sending a tcp reset. 
+
+
+Step 3: Add the raspberry load the iptables configuration at startup
+```bash
+$ sudo nano /etc/rc.local
+```
+```bash
+
+    # Add the iptables-restore statement here to load the 
+    # iptables.ipv4.nat configuration, just before the 
+    # exit 0 statement. 
+    iptables-restore < /etc/iptables.ipv4.nat
+
+    exit 0
+```
+
+Step 4: Restart the Raspberry Pi and log back in again
+```bash
+$ sudo restart
+```
+
+Step 5: Verify the ip tables configuration
+```bash
+$ sudo iptables -L -v -n
+```
+
+
+#### Troubleshooting
+
+
+#### Summary
+The chapters until here has taken you all the way to get your Raspberry Pi up and running as a simple wifi accesspoint. We have added the dnsmasq configuration, with both dns-, dhcp-, hostnames- and some basic iptables configuration. As I wrote, iptables are somewhat complex for beginners, I promise we will be touching the iptables configuration in further chapters. From this point we will be securing the configurations.
 
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
 in progress, subject to change
