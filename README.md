@@ -996,7 +996,33 @@ $ sudo ipsec statusall
 
 
 ### Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network
-in progress
+in progress, and subject to change
+
+Now that we have functional accesspoints and are hopefully using them for our devices, such as phones etc, I will take the opportunity to get you started on automated network scanning. This to find the simplest form of vulnerabilities on your networks. This section is for somewhat advanced users, but I will try to keep it simple.
+
+There are 2 questions we need to solve before we get started.
+* First: Why would we want to automate scans on our wifi networks?
+* Second: Setting the correct expectations?
+
+##### First: Why would we want to automate scans on our wifi networks?
+* To detect devices attached to our network. Our devices and potential rouge devices.
+* To detect devices attached to our network. Detect the obvious security holes.
+* What you don't know you cannot defend against. If you don't look, you'll never find out.
+
+##### Second: Setting the correct expectations?
+NMAP is in first case an enumeration tool, to map networks. The plugins used by NMAP are small skripts to attempt to identify the simplest and probably the worst kind of vulnerabilities. NMAP is not full scale a vulnerability scanner, but a network mapper - to detect whatever it is you have connected to your network.
+
+In this section we will
+* Add a USB 3.0 Kingston 64GB storage volume for NMAP data and for future storage of PCAP data on your Raspberry Pi 4 wifi accesspoint.
+* Add auto-mount configuration for the 64 GB volume.
+* Add crontab scheduled NMAP plugin downloads.
+* Add crontab scheduled NMAP scans and write those to the Kingston 64GB volume.
+
+Lets get started
+
+Step 1: Start by inserting the Kingston 64GB in the blue usb 3.0 ports on your Raspberry Pi wifi accesspoint.
+Step 2: Logon with SSH or console, on your accesspoint.
+
 
 
 ### Chapter 0x0A: Configuring and securing the SSH server access
