@@ -1020,8 +1020,93 @@ In this section we will
 
 Lets get started
 
-Step 1: Start by inserting the Kingston 64GB in the blue usb 3.0 ports on your Raspberry Pi wifi accesspoint.
-Step 2: Logon with SSH or console, on your accesspoint.
+Step 1: Logon with SSH or console, on your Raspberry Pi wifi accesspoint.
+
+Step 2: Remove any unused USB disks to prevent data deletion.
+
+Step 3: Start by inserting the Kingston 64GB in the blue usb 3.0 ports and run the following command.
+```bash
+dmesg
+```
+
+```bash
+    ...
+    ...
+    [16758.236924] usb 2-1: new SuperSpeed Gen 1 USB device number 2 using xhci_hcd
+    [16758.258823] usb 2-1: New USB device found, idVendor=0951, idProduct=1666, bcdDevice= 1.10
+    [16758.258840] usb 2-1: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+    [16758.258851] usb 2-1: Product: DataTraveler 3.0
+    [16758.258860] usb 2-1: Manufacturer: Kingston
+    [16758.258869] usb 2-1: SerialNumber: 408D5C165308E3C1A9442E39
+    [16758.263555] usb-storage 2-1:1.0: USB Mass Storage device detected
+    [16758.265674] scsi host0: usb-storage 2-1:1.0
+    [16759.293326] scsi 0:0:0:0: Direct-Access     Kingston DataTraveler 3.0 PMAP PQ: 0 ANSI: 6
+    [16759.295989] sd 0:0:0:0: [sda] 121110528 512-byte logical blocks: (62.0 GB/57.8 GiB)
+    [16759.296328] sd 0:0:0:0: [sda] Write Protect is off
+    [16759.296335] sd 0:0:0:0: [sda] Mode Sense: 45 00 00 00
+    [16759.299824] sd 0:0:0:0: [sda] Write cache: disabled, read cache: enabled, doesn't support DPO or FUA
+    [16759.305521] sd 0:0:0:0: Attached scsi generic sg0 type 0
+    [16760.589334]  sda: sda1
+    [16760.591770] sd 0:0:0:0: [sda] Attached SCSI removable disk
+    ...
+```
+Step 4: Clear the Kingston 64GB memory, this will delete whatever is on it.
+```bash
+$ sudo dcfldd if=/dev/zero of=/dev/sda bs=4M
+```
+
+```bash
+$ sudo sync
+```
+List the memory devices attached to the Raspberry
+```bash
+$ sudo fdisk -l
+```
+Add a primary partition of type 0x83 on the kingston memory
+```bash
+$ sudo fdisk /dev/sda
+```
+Add the EXT4 filesystem on the kingston memory partition that you just created
+```bash
+$ sudo mkfs.ext4 /dev/sda1
+```
+Show the UUID added to the partition
+```bash
+$ sudo lsblk -f
+```
+```bash
+    ...
+    NAME        FSTYPE LABEL  UUID                                 FSAVAIL FSUSE% MOUNTPOINT
+    sda                                                                           
+    └─sda1      ext4          e4ef75de-acfd-459a-8f1e-d9becc517e55     53G     1% 
+    ...
+```
+
+Edit the filesystem tab, to add the UUID from the previous step
+```bash
+$ sudo nano /etc/fstab
+```
+```bash
+    UUID=c49b9927-9931-455b-843d-5185f2a11c2d       /mnt/volume     ext4    defaults,noatime  0       1
+```
+
+Create the mount directory under the /mnt folder
+```bash
+$ sudo mkdir /mnt/volume
+```
+
+Set the mount directory with the correct ownership
+```bash
+$ sudo chown -Rv pi:pi /mnt/volume
+```
+
+In progress ...
+
+
+
+
+
+
 
 
 
