@@ -996,34 +996,6 @@ Get the status of the ipsec.service
 $ sudo systemctl status ipsec.service
 ```
 
-Get the status of the ipsec connections made so far
-```bash
-$ sudo ipsec statusall
-```
-```bash
-    Status of IKE charon daemon (strongSwan x.x.x, Linux 5.x.x-v7l+, armv7l):
-      uptime: 13 days, since Mar 19 19:05:06 2021
-      malloc: sbrk 2760704, mmap 0, used 907056, free 1853648
-      worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 3
-      loaded plugins: charon aes rc2 sha2 sha1 md5 mgf1 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp dnskey sshkey pem openssl fips-prf gmp agent xcbc hmac gcm attr kernel-netlink resolve socket-default connmark stroke updown counters
-    Virtual IP pools (size/online/offline):
-      192.168.231.0/24: 254/1/1
-    Listening IP addresses:
-      192.168.220.30
-      192.168.230.254
-    Connections:
-    vpnserver-dhcpclients:  192.168.230.254...%any  IKEv2, dpddelay=30s
-    vpnserver-dhcpclients:   local:  [wifi-03@wifi.firestorm.org] uses pre-shared key authentication
-    vpnserver-dhcpclients:   remote: [*@wifi.firestorm.org] uses pre-shared key authentication
-    vpnserver-dhcpclients:   child:  0.0.0.0/0 === dynamic TUNNEL, dpdaction=restart
-    Security Associations (1 up, 0 connecting):
-    vpnserver-dhcpclients[402]: ESTABLISHED 24 minutes ago, 192.168.230.254[wifi-03@wifi.firestorm.org]...192.168.230.15[JM-6s-Plus@wifi.firestorm.org]
-    vpnserver-dhcpclients[402]: IKEv2 SPIs: e37ebeff3870b2c6_i f76ce6da4ebbcdf9_r*, rekeying in 30 minutes
-    vpnserver-dhcpclients[402]: IKE proposal: AES_CBC_256/HMAC_SHA2_256_128/PRF_HMAC_SHA2_256/MODP_2048
-    vpnserver-dhcpclients{1923}:  INSTALLED, TUNNEL, reqid 41, ESP SPIs: c693110e_i 08f45c7a_o
-    vpnserver-dhcpclients{1923}:  AES_CBC_256/HMAC_SHA2_256_128, 12652 bytes_i (81 pkts, 52s ago), 26505 bytes_o (69 pkts, 52s ago), rekeying in 11 hours
-    vpnserver-dhcpclients{1923}:   0.0.0.0/0 === 192.168.231.1/32
-```
 #### Connecting your iPhone
 To add VPN on iPhone start the Settings app.
 
@@ -1049,7 +1021,7 @@ In the field Secret, enter the pre-shared key that you selected in the ipsec.sec
 
 Select OK and start the IPsec connection.
 
-#### Verify the IPSec connection on Raspberry
+#### Verify the iptables traffic selector for ipsec on Raspberry
 Verify the automated ipsec policy match rules was created when IPSec connection was negotiated.
 ```bash
 $ sudo iptables -L -v -n
@@ -1060,14 +1032,42 @@ Chain INPUT (policy ACCEPT 1M packets, 1M bytes)
 
 Chain FORWARD (policy DROP 1492K packets, 96M bytes)
  pkts bytes target     prot opt in     out     source               destination         
- 52     460 ACCEPT     all  --  wlan0  *       192.168.231.1        0.0.0.0/0            policy match dir in pol ipsec reqid 1 proto 50
- 8675    2K ACCEPT     all  --  *      wlan0   0.0.0.0/0            192.168.231.1        policy match dir out pol ipsec reqid 1 proto 50
+ 52     460 ACCEPT     all  --  wlan0  *       192.168.231.1        0.0.0.0/0            policy match dir in pol ipsec reqid 2 proto 50
+ 8675    2K ACCEPT     all  --  *      wlan0   0.0.0.0/0            192.168.231.1        policy match dir out pol ipsec reqid 2 proto 50
 
 Chain INPUT (policy ACCEPT 1M packets, 1M bytes)
  pkts bytes target     prot opt in     out     source               destination   
  ...
 ```
 
+#### Verify the ipsec security associations on Raspberry
+```bash
+$ sudo ipsec statusall
+```
+```bash
+    Status of IKE charon daemon (strongSwan x.x.x, Linux 5.x.x-v7l+, armv7l):
+      uptime: 13 days, since Mar 19 19:05:06 2021
+      malloc: sbrk 2760704, mmap 0, used 907056, free 1853648
+      worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 3
+      loaded plugins: charon aes rc2 sha2 sha1 md5 mgf1 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp dnskey sshkey pem openssl fips-prf gmp agent xcbc hmac gcm attr kernel-netlink resolve socket-default connmark stroke updown counters
+    Virtual IP pools (size/online/offline):
+      192.168.231.0/24: 254/1/1
+    Listening IP addresses:
+      192.168.220.30
+      192.168.230.254
+    Connections:
+    vpnserver-dhcpclients:  192.168.230.254...%any  IKEv2, dpddelay=30s
+    vpnserver-dhcpclients:   local:  [wifi-03@wifi.firestorm.org] uses pre-shared key authentication
+    vpnserver-dhcpclients:   remote: [*@wifi.firestorm.org] uses pre-shared key authentication
+    vpnserver-dhcpclients:   child:  0.0.0.0/0 === dynamic TUNNEL, dpdaction=restart
+    Security Associations (1 up, 0 connecting):
+    vpnserver-dhcpclients[2]: ESTABLISHED 24 minutes ago, 192.168.230.254[wifi-03@wifi.firestorm.org]...192.168.230.15[JM-6s-Plus@wifi.firestorm.org]
+    vpnserver-dhcpclients[2]: IKEv2 SPIs: e37ebeff3870b2c6_i f76ce6da4ebbcdf9_r*, rekeying in 30 minutes
+    vpnserver-dhcpclients[2]: IKE proposal: AES_CBC_256/HMAC_SHA2_256_128/PRF_HMAC_SHA2_256/MODP_2048
+    vpnserver-dhcpclients{2}:  INSTALLED, TUNNEL, reqid 41, ESP SPIs: c693110e_i 08f45c7a_o
+    vpnserver-dhcpclients{2}:  AES_CBC_256/HMAC_SHA2_256_128, 12652 bytes_i (81 pkts, 52s ago), 26505 bytes_o (69 pkts, 52s ago), rekeying in 11 hours
+    vpnserver-dhcpclients{2}:   0.0.0.0/0 === 192.168.231.1/32
+```
 
 #### Troubleshooting
 
