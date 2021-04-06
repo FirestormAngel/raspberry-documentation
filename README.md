@@ -997,7 +997,6 @@ $ sudo systemctl status ipsec.service
 ```
 
 Get the status of the ipsec connections made so far
-
 ```bash
 $ sudo ipsec statusall
 ```
@@ -1049,6 +1048,26 @@ In the field Use Certificate, select *off*
 In the field Secret, enter the pre-shared key that you selected in the ipsec.secret file.
 
 Select OK and start the IPsec connection.
+
+#### Verify the IPSec connection on Raspberry
+Verify the automated ipsec policy match rules was created when IPSec connection was negotiated.
+```bash
+$ sudo iptables -L -v -n
+```
+```bash
+Chain INPUT (policy ACCEPT 1M packets, 1M bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain FORWARD (policy DROP 1492K packets, 96M bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+ 52     460 ACCEPT     all  --  wlan0  *       192.168.231.1        0.0.0.0/0            policy match dir in pol ipsec reqid 1 proto 50
+ 8675    2K ACCEPT     all  --  *      wlan0   0.0.0.0/0            192.168.231.1        policy match dir out pol ipsec reqid 1 proto 50
+
+Chain INPUT (policy ACCEPT 1M packets, 1M bytes)
+ pkts bytes target     prot opt in     out     source               destination   
+ ...
+```
+
 
 #### Troubleshooting
 
