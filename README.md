@@ -1043,6 +1043,9 @@ Now that we have functional accesspoints and are hopefully using them for our de
 #### Setting the right expectations
 NMAP is in first case an enumeration tool, to map networks. The plugins used by NMAP are small skripts to attempt to identify the simplest and probably the worst kind of vulnerabilities. NMAP is not full scale a vulnerability scanner, but a network mapper. Its primary usage is to detect whatever it is you have connected on your network.
 
+#### Permission to scan
+Before performing these steps, make sure you are authorized with a written permission from whoever owns the transit network. Don't scan networks from your Internet provider without written permission.
+
 #### Installation and configuration instructions
 In this section we will prepare a USB 3.0 storage for the upcomming chapters, add scheduled plugin downloads and network scans.
 
@@ -1127,18 +1130,38 @@ $ sudo nano /etc/fstab
     UUID=e4ef75de-acfd-459a-8f1e-d9becc517e55       /mnt/volume     ext4    defaults,noatime  0       1
 ```
 
-Step 4.7: Create the mount directory under the /mnt folder
+Step 4.7: Create the mount directory under the /mnt folder.
 ```bash
 $ sudo mkdir /mnt/volume
 ```
 
-Step 4.8: Set the mount directory with the correct ownership
+Step 4.8: Set the mount directory with the correct ownership.
 ```bash
 $ sudo chown -Rv pi:pi /mnt/volume
 ```
 
-Step 5: Schedule NMAP tasks to download and scan networks.
+Step 5: Mount all defined volumes from the fstab.
+```bash
+$ sudo mount -a
+```
+Step 6: Verify that /dev/sda1 was mounted to /mnt/volume.
+```bash
+$ df -h
+```
+```bash
+    Filesystem        Size   Used   Free Use% Mount
+    /dev/root          29G   3,2G    25G  12% /
+    devtmpfs          1,8G      0   1,8G   0% /dev
+    tmpfs             1,8G      0   1,8G   0% /dev/shm
+    tmpfs             1,8G   177M   1,7G  10% /run
+    tmpfs             5,0M   4,0K   5,0M   1% /run/lock
+    tmpfs             1,8G      0   1,8G   0% /sys/fs/cgroup
+    /dev/mmcblk0p1    253M    48M   205M  19% /boot
+    /dev/sda1          57G     0G    56G   0% /mnt/volume
+    tmpfs             365M      0   365M   0% /run/user/1000
+```
 
+Step 7: Schedule NMAP tasks to download and scan networks.
 ```bash
 $ crontab -e
 ```
@@ -1156,11 +1179,17 @@ $ crontab -e
 # at 18:00 - download updated plugin scripts from nmap.
 00 18 * * * /usr/bin/nmap --script-updatedb > /dev/null 2>&1
 
-# every 15 minutes scan subnet 192.168.220.0/24 and write the outputfiles to /mnt/volume with datetime.
-*/15 * * * * /usr/bin/nmap 192.168.220.0/24 -oA /mnt/volume/firestorm-192.168.220.0-$(date +\%Y\%m\%d_\%H\%M\%S) > /dev/null 2>&1
+########################################
+## DISCLAIMER                         ##
+## Make sure you have written         ##
+## permission to scan the network     ##
+########################################
 
-# every 15 minutes scan subnet 192.168.230.0/24 and write the outputfiles to /mnt/volume with datetime.
-*/15 * * * * /usr/bin/nmap 192.168.230.0/24 -oA /mnt/volume/firestorm-192.168.230.0-$(date +\%Y\%m\%d_\%H\%M\%S) > /dev/null 2>&1
+# every 30 minutes scan subnet 192.168.220.0/24 and write the outputfiles to /mnt/volume with datetime.
+*/30 * * * * /usr/bin/nmap 192.168.220.0/24 -oA /mnt/volume/firestorm-192.168.220.0-$(date +\%Y\%m\%d_\%H\%M\%S) > /dev/null 2>&1
+
+# every 30 minutes scan subnet 192.168.230.0/24 and write the outputfiles to /mnt/volume with datetime.
+*/30 * * * * /usr/bin/nmap 192.168.230.0/24 -oA /mnt/volume/firestorm-192.168.230.0-$(date +\%Y\%m\%d_\%H\%M\%S) > /dev/null 2>&1
 
 ```
 
