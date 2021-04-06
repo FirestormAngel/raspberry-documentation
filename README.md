@@ -1034,13 +1034,13 @@ $ sudo ipsec statusall
 ### Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network
 Now that we have functional accesspoints and are hopefully using them for our devices, such as iphones, etc. I will take the opportunity to get you started on automated network scanning. This to find the simplest form of vulnerabilities on your networks. This section is for somewhat advanced users, but I will try to keep it simple.
 
-#### Why automate scans on our wifi networks?
-* To detect devices attached to our network, our devices and potentially rouge devices.
+#### Why automate scans on wifi networks?
+* To detect devices attached to the network, our devices and potentially rouge devices.
 * To detect obvious security holes on detected devices.
-* What you don't know you cannot defend against.
+* What you don't know, you cannot defend.
 * If you don't look, you'll never find out.
 
-##### Setting the right expectations
+#### Setting the right expectations
 NMAP is in first case an enumeration tool, to map networks. The plugins used by NMAP are small skripts to attempt to identify the simplest and probably the worst kind of vulnerabilities. NMAP is not full scale a vulnerability scanner, but a network mapper. Its primary usage is to detect whatever it is you have connected on your network.
 
 #### Installation and configuration instructions
@@ -1078,29 +1078,37 @@ dmesg
     [16760.591770] sd 0:0:0:0: [sda] Attached SCSI removable disk
     ...
 ```
-Step 4: Clear the Kingston 64GB memory, this will delete whatever is on it.
+NOTE; In my case it is a /dev/sda device that is detected with a sdb1 partition on it. In your case it could be something else. 
+
+
+Step 4: Clear the Kingston 64GB /dev/sda disk, WARNING this will delete whatever is on it.
 ```bash
 $ sudo dcfldd if=/dev/zero of=/dev/sda bs=4M
 ```
 
+Step 4.1: Run sync to have the previous operations written and finalized to disk.
 ```bash
 $ sudo sync
 ```
-List the memory devices attached to the Raspberry
+
+Step 4.2: List the memory devices attached to the Raspberry.
 ```bash
 $ sudo fdisk -l
 ```
-Add a primary partition of type 0x83 on the kingston memory
+
+Step 4.3: Add a primary partition of type 0x83 on the kingston /dev/sda disk.
 ```bash
 $ sudo fdisk /dev/sda
 ```
-Add the EXT4 filesystem on the kingston memory partition that you just created
+
+Step 4.4: Add the EXT4 filesystem on the kingston memory partition that you just created.
 ```bash
 $ sudo mkfs.ext4 /dev/sda1
 ```
-Show the UUID added to the partition
+
+Step 4.5: Show the UUID added with the EXT4 /dev/sda1 partition.
 ```bash
-$ sudo lsblk -f
+$ sudo lsblk -f /dev/sda
 ```
 ```bash
     ...
@@ -1110,32 +1118,55 @@ $ sudo lsblk -f
     ...
 ```
 
-Edit the filesystem tab, to add the UUID from the previous step
+Step 4.6: Edit the filesystem tab, and add the UUID from the previous step, to have the new volume mounted at system start.
 ```bash
 $ sudo nano /etc/fstab
 ```
 ```bash
-    UUID=c49b9927-9931-455b-843d-5185f2a11c2d       /mnt/volume     ext4    defaults,noatime  0       1
+    # add the following line, with the UUID from the step above.
+    UUID=e4ef75de-acfd-459a-8f1e-d9becc517e55       /mnt/volume     ext4    defaults,noatime  0       1
 ```
 
-Create the mount directory under the /mnt folder
+Step 4.7: Create the mount directory under the /mnt folder
 ```bash
 $ sudo mkdir /mnt/volume
 ```
 
-Set the mount directory with the correct ownership
+Step 4.8: Set the mount directory with the correct ownership
 ```bash
 $ sudo chown -Rv pi:pi /mnt/volume
 ```
 
-In progress ...
+Step 5: Schedule NMAP tasks to download and scan networks.
 
+```bash
+$ crontab -e
+```
 
+```bash
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
 
+# at 18:00 - download updated plugin scripts from nmap.
+00 18 * * * /usr/bin/nmap --script-updatedb > /dev/null 2>&1
 
+# every 15 minutes scan subnet 192.168.220.0/24 and write the outputfiles to /mnt/volume with datetime.
+*/15 * * * * /usr/bin/nmap 192.168.220.0/24 -oA /mnt/volume/firestorm-192.168.220.0-$(date +\%Y\%m\%d_\%H\%M\%S) > /dev/null 2>&1
 
+# every 15 minutes scan subnet 192.168.230.0/24 and write the outputfiles to /mnt/volume with datetime.
+*/15 * * * * /usr/bin/nmap 192.168.230.0/24 -oA /mnt/volume/firestorm-192.168.230.0-$(date +\%Y\%m\%d_\%H\%M\%S) > /dev/null 2>&1
 
+```
 
+#### Troubleshooting
+
+#### Summary
 
 
 ### Chapter 0x0A: Configuring and securing the SSH server access
