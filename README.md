@@ -478,17 +478,21 @@ $ sudo systemctl stop hostapd.service
 
 
 ### Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
-in progress, subject to change
 
-In this chapter we are going to enable dhcp and dns which will enable your accesspoint to configure your wifi attached devices with the ip addresses they will be using to navigate the wifi network. I'll be using dnsmasq since this probably is the most qualified software for this task. Dnsmasq is widely used in routers and appliances for both dhcp and dns navigation. If you shoud select something, then select dnsmasq. In a few moments you'll understand why.
+#### Why do we need the dnsmasq service?
+In this chapter we are going to enable dhcp and dns which will enable your accesspoint to configure any wifi attached devices with the ip addresses they will be using to navigate the wifi network. I'll be using dnsmasq since this probably is the most qualified software for this task.
 
-I'm repeating the installation of dnsutils, tcpdump, nmap, because you will need them later in this chapter.
+#### Set the right expectations
+Dnsmasq is widely used in routers and other network appliances for both dhcp and dns services. If you shoud select something, then select dnsmasq, its easy and uncomplicated. Keep things simple.
 
+I'm repeating the installation of dnsutils, tcpdump, because you will need them later in this chapter.
+
+#### Dnsmasq installation instructions
 update, upgrade and install dnsmasq
 ```bash
 $ sudo apt-get update
 $ sudo apt-get upgrade
-$ sudo apt-get install dnsmasq dnsutils tcpdump nmap -y
+$ sudo apt-get install dnsmasq dnsutils tcpdump -y
 ```
 ```bash
 $ sudo systemctl stop dnsmasq
@@ -601,16 +605,17 @@ $ sudo nano /etc/hosts
 
 ```
 
-##### Making a temporary network address translation (NAT) on your raspberry
-One of the more important things left to do now, is to separate the wifi-network (wlan0 192.168.230.0/24) from the transit-network (eth0 192.168.220.0/24). Since this is 2 different subnets we neet to add a network address translation, in network terms referred to as NAT.
+#### iptables
+To separate the *wifi-network* (**wlan0** 192.168.230.0/24) from the *transit-network* (**eth0** 192.168.220.0/24), we need to add a network address translation, in network terms referred to as NAT. Iptables will do that for free.
 
-This would normally be done by adding a **post routing masquerade** on Linux, yes its still a NAT on the eth0 interface, since this is going to route the wifi traffic out towards the Internet and set the routing tables correctly for packet forwarding between wlan0 and eth0, the best thing to do is to add this on eth0.
+##### Making a temporary network address translation (NAT) on your raspberry
+A **post routing masquerade**, yes a nat, on the eth0 interface will translate one network to another by changing the source ip of a packet on its way through the device and route the wifi traffic out towards the Internet.
 
 Add the following statement on your raspberry to start network address translation
 ```bash
 $ sudo iptables -A POSTROUTING -o eth0 -j MASQUERADE
 ```
-IMPORTANT; Do note that the above statement is in no way permanent, if you turn the raspberry off or restart it, you will need to add this statement again.
+IMPORTANT; Though this is the correct way to do this, do note that the above statement is in no way permanent. If you turn the raspberry off or restart it, you will need to add this statement again.
 
 ##### Making a permanent network address translation (NAT) on your raspberry
 Networking and iptables on Linux is difficult subject for people who are not familiar with network configurations. In other words this section could work for you, or it could bring you a lot of headache. I'll try to make this as simple and easy as possible and in each chapter from here, add more detail.
@@ -618,7 +623,7 @@ Networking and iptables on Linux is difficult subject for people who are not fam
 * Step 1: Add a iptables configuration file on disk
 * Step 2: Add the permanent statements to the configuration file
 * Step 3: Add the raspberry load the iptables configuration at startup
-* Step 4: Restart the Raspberry Pi and log back in again
+* Step 4: Load the iptables configuration
 * Step 5: Verify the ip tables configuration
 
 Step 1: Add a iptables configuration file on disk
@@ -697,12 +702,15 @@ $ sudo nano /etc/rc.local
     exit 0
 ```
 
-Step 4: Restart the Raspberry Pi and log back in again
+Step 4: Load the iptables configuration
 ```bash
-$ sudo restart
+$ sudo iptables-restore < /etc/iptables.ipv4.nat
 ```
 
 Step 5: Verify the ip tables configuration
+```bash
+$ sudo iptables-save
+```
 ```bash
 $ sudo iptables -L -v -n
 ```
