@@ -726,17 +726,16 @@ The chapters until here has taken you all the way to get your Raspberry Pi up an
 
 
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
-in progress, subject to change
 
 #### Why do we need IPSec on the wifi?
 Wireless technology, is wireless. Unfortunately wifi access 802.11a/b/g/n/ac with WPA1 and WPA2 is not too difficult to gain access to, even with long passwords its still easy to overtake, overcome, get in to and also inject data into. To prevent this from happening we have the IPsec protocol (50), which will establish, exchange keys and negotiate security associations, making encrypted tunnels which is really difficult to inject data into from a 3rd party on the network.
 
-Right, just to set this straight; And then there is the aspect of rouge devices, evil doers doing stuff, injecting data into your wifi data streams or just someone using your network to download porn. Having a wifi is not just about you, but also potentially about someone else too.
+There is also the aspect of rouge devices, evil doers, injecting data into your wifi data streams or just risk of someone using your network to download porn. Thats right. Having a wifi is not just about you, but also potentially about someone else using your Internet. The arguments to use tunnels encrypted with IPsec is strong.
 
 #### Set the right expectations
-I've tested IPsec tunnels with certificates from a home made 4096bit certificate authority and issued 2048bit certificates, however that is just too complex to write in this guide. We are instead going to set a good long passphrase for you, to get you easygoing and to prevent evil doers from injecting stuff between you and your raspberry.
+I've tested IPsec tunnels with certificates from a home made 4096bit certificate authority and issued 2048bit certificates, however that is just too complex to write in this guide. I am instead going to set a long passphrase for you, to get you going and to prevent evil doers from injecting stuff between you and your raspberry.
 
-If you want to secure your wifi network, you can enable NAT on the wlan0 card to prevent any other wifi traffic from passing your raspberry without first negotiating an IPsec tunnel into the Raspberry. I will give some examples on how to do that. Just remember that some devices don't have IPSec builtin, and they cannot use IPSec .. Some examples are; TVs, IoTs, Arduinos, and such. You will have to decide whats good enough for you, I'll just give you the tools.
+If you want to secure your wifi network, you can also enable NAT on the wlan0 card to prevent any other wifi traffic from passing your raspberry without first negotiating an IPsec tunnel into the Raspberry. I will give some examples on how to do that. Just remember that some devices don't have IPSec builtin, and they cannot use IPSec .. Some examples are; TVs, IoTs, Arduinos, older mobilephones, and such. You will have to decide whats good enough for you, I'll just give you the tools to secure your network. Al dente style.
 
 #### Installation and configuration instructions
 
@@ -816,11 +815,13 @@ $ sudo nano /etc/ipsec.secrets
     # EXAMPLE: yourdevice
     yourdevice@wifi.firestorm.org : PSK YourSuperLongPasswordHere
 ```
-To prevent future problems with implicit deny iptables, which we will enable later, here are some things to prepare.
 
-IMPORTANT; The above configured ipsec configuration will work flawlessly with iptables when installing strongswan on a vanilla raspberry-kernel; however it will definately stop working when updating the raspberry kernel to new versions. Obviously there is some compiled or hardwired relation between the strongswan version and the iptables netlink kernel driver.
+#### iptables
+To prevent future problems with implicit deny iptables, which we will enable later, here are some things to prepare in your IPSec configuration.
 
-To make this work, also with an updated kernel, you will need to enable the charon kernel-netlink and socket-default traffic selectors.
+IMPORTANT; The above configured ipsec configuration will work flawlessly with iptables when installing strongswan on a vanilla raspberry-kernel; however it will definately stop working when updating the raspberry kernel to newer versions. Obviously there are some compiled or hardwired relation between the strongswan version and the iptables netlink kernel driver.
+
+To make this work anyway, also with an updated kernel, you will need to enable the charon kernel-netlink, socket-default and libipsec traffic selectors.
 
 * Step 1: Enable the charon socket-default fwmark and load the socket selector.
 * Step 2: Enable the charon kernel-netlink negated fwmark and load the netlink selector.
@@ -1024,30 +1025,26 @@ $ sudo ipsec statusall
     vpnserver-dhcpclients{1923}:  AES_CBC_256/HMAC_SHA2_256_128, 12652 bytes_i (81 pkts, 52s ago), 26505 bytes_o (69 pkts, 52s ago), rekeying in 11 hours
     vpnserver-dhcpclients{1923}:   0.0.0.0/0 === 192.168.231.1/32
 ```
+#### Troubleshooting
+
+#### Summary
+
 
 
 ### Chapter 0x09: Configuring scheduled crontab NMAP scans of your wifi network
-in progress, and subject to change
+Now that we have functional accesspoints and are hopefully using them for our devices, such as iphones, etc. I will take the opportunity to get you started on automated network scanning. This to find the simplest form of vulnerabilities on your networks. This section is for somewhat advanced users, but I will try to keep it simple.
 
-Now that we have functional accesspoints and are hopefully using them for our devices, such as phones etc, I will take the opportunity to get you started on automated network scanning. This to find the simplest form of vulnerabilities on your networks. This section is for somewhat advanced users, but I will try to keep it simple.
+#### Why automate scans on our wifi networks?
+* To detect devices attached to our network, our devices and potentially rouge devices.
+* To detect obvious security holes on detected devices.
+* What you don't know you cannot defend against.
+* If you don't look, you'll never find out.
 
-There are 2 questions we need to solve before we get started.
-* First: Why would we want to automate scans on our wifi networks?
-* Second: Setting the correct expectations?
+##### Setting the right expectations
+NMAP is in first case an enumeration tool, to map networks. The plugins used by NMAP are small skripts to attempt to identify the simplest and probably the worst kind of vulnerabilities. NMAP is not full scale a vulnerability scanner, but a network mapper. Its primary usage is to detect whatever it is you have connected on your network.
 
-##### First: Why would we want to automate scans on our wifi networks?
-* To detect devices attached to our network. Our devices and potential rouge devices.
-* To detect devices attached to our network. Detect the obvious security holes.
-* What you don't know you cannot defend against. If you don't look, you'll never find out.
-
-##### Second: Setting the correct expectations?
-NMAP is in first case an enumeration tool, to map networks. The plugins used by NMAP are small skripts to attempt to identify the simplest and probably the worst kind of vulnerabilities. NMAP is not full scale a vulnerability scanner, but a network mapper - to detect whatever it is you have connected to your network.
-
-In this section we will
-* Add a USB 3.0 Kingston 64GB storage volume for NMAP data and for future storage of PCAP data on your Raspberry Pi 4 wifi accesspoint.
-* Add auto-mount configuration for the 64 GB volume.
-* Add crontab scheduled NMAP plugin downloads.
-* Add crontab scheduled NMAP scans and write those to the Kingston 64GB volume.
+#### Installation and configuration instructions
+In this section we will prepare a USB 3.0 storage for the upcomming chapters, add scheduled plugin downloads and network scans.
 
 Lets get started
 
