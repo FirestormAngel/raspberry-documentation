@@ -728,8 +728,22 @@ The chapters until here has taken you all the way to get your Raspberry Pi up an
 ### Chapter 0x08: Installing and configuring components for IPSec, iptables
 in progress, subject to change
 
-Install the StrongSwan IPSec packages.
+#### Why do we need IPSec on the wifi?
+Wireless technology, is wireless. Unfortunately wifi access 802.11a/b/g/n/ac with WPA1 and WPA2 is not too difficult to gain access to, even with long passwords its still easy to overtake, overcome, get in to and also inject data into. To prevent this from happening we have the IPsec protocol (50), which will establish, exchange keys and negotiate security associations, making encrypted tunnels which is really difficult to inject data into from a 3rd party on the network.
+
+Right, just to set this straight; And then there is the aspect of rouge devices, evil doers doing stuff, injecting data into your wifi data streams or just someone using your network to download porn. Having a wifi is not just about you, but also potentially about someone else too.
+
+#### Set the right expectations
+I've tested IPsec tunnels with certificates from a home made 4096bit certificate authority and issued 2048bit certificates, however that is just too complex to write in this guide. We are instead going to set a good long passphrase for you, to get you easygoing and to prevent evil doers from injecting stuff between you and your raspberry.
+
+If you want to secure your wifi network, you can enable NAT on the wlan0 card to prevent any other wifi traffic from passing your raspberry without first negotiating an IPsec tunnel into the Raspberry. I will give some examples on how to do that. Just remember that some devices don't have IPSec builtin, and they cannot use IPSec .. Some examples are; TVs, IoTs, Arduinos, and such. You will have to decide whats good enough for you, I'll just give you the tools.
+
+#### Installation and configuration instructions
+
+Update, upgrade and install the StrongSwan IPSec packages.
 ```bash
+$ sudo apt-get update
+$ sudo apt-get upgrade -y
 $ sudo apt-get install strongswan -y
 ```
 
