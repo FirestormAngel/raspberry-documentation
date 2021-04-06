@@ -186,10 +186,15 @@ Note: I will add IPv6 configuration later, and when I do, it will work perfectly
 ### Chapter 0x04: Synchronizing the time with Network Time Servers
 in progress, also subject to change
 
+#### Why do we need network time servers?
 Since your raspberry doesnt have a physical clock, its important to have it synchronize its clock with the configured network time servers available. Like anyone working with Cyber security, correct timestamps is of the essence in any evidence or logs. This to determine the correct timestamp something happened. Failing to do so, will render logs and evidence unusable.
 
+#### Set the right expectations
 Ok, you don't really have to change the *timesynccd* service, because it comes preinstalled on Debian Buster, however it is a good idea to have knowledge about this service existance, and that you don't need to install the ntp service. The NTP service which in turn will open port UDP/123, opening a footprint for traffic towards your Raspberry. The ntp service is complicated to secure, so unless you know how, don't use it.
 
+#### Examples
+
+Example: The location of your NTP (Network Time Protocol) server configuration
 ```bash
 $ sudo nano /etc/systemd/timesyncd.conf
 ```
@@ -263,6 +268,10 @@ Example: Restart the **systemd-timesyncd** service.
 ```bash
 $ systemctl restart systemd-timesyncd
 ```
+#### Troubleshooting
+
+
+#### Summary
 Thankyou for reading this section, this will help you in our later sections during logging, evidence and negotiating ipsec and prevent you from getting errors later when we use transport layer security with certificates. They will depend on you completing this section.
 
 
