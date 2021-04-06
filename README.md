@@ -606,19 +606,19 @@ $ sudo nano /etc/hosts
 ```
 
 #### iptables
-To separate the *wifi-network* (**wlan0** 192.168.230.0/24) from the *transit-network* (**eth0** 192.168.220.0/24), we need to add a network address translation, in network terms referred to as NAT. Iptables will do that for free.
+To separate the wifi-network (192.168.230.0/24) from the transit-network (192.168.220.0/24), we need to add a network address translation (NAT). Thankfully we have iptables, who will do that for free.
 
-##### Making a temporary network address translation (NAT) on your raspberry
-A **post routing masquerade**, yes a nat, on the eth0 interface will translate one network to another by changing the source ip of a packet on its way through the device and route the wifi traffic out towards the Internet.
+A **postrouting masquerade**, NAT, on the eth0 interface will translate one network to another by changing the source ip of a packet on its way out through the eth0 device. It will help route wifi traffic out towards the Internet, and infact keep state and translate traffic going back in. Again, for free.
 
+#### Making a temporary network address translation (NAT) on your raspberry
 Add the following statement on your raspberry to start network address translation
 ```bash
 $ sudo iptables -A POSTROUTING -o eth0 -j MASQUERADE
 ```
-IMPORTANT; Though this is the correct way to do this, do note that the above statement is in no way permanent. If you turn the raspberry off or restart it, you will need to add this statement again.
+IMPORTANT; Although this is the correct way to do this, do note that the above statement is in no way permanent. If you turn the raspberry off or restart it, you will need to add this statement again.
 
-##### Making a permanent network address translation (NAT) on your raspberry
-Networking and iptables on Linux is difficult subject for people who are not familiar with network configurations. In other words this section could work for you, or it could bring you a lot of headache. I'll try to make this as simple and easy as possible and in each chapter from here, add more detail.
+#### Making a permanent network address translation (NAT) on your raspberry
+Networking and iptables on Linux is difficult subject for people who are not familiar with network configurations. In other words this section could work for you, or it could bring you a lot of headache. I'll try to keep this as simple and easy as possible and in each chapter from here, add more detail.
 
 * Step 1: Add a iptables configuration file on disk
 * Step 2: Add the permanent statements to the configuration file
