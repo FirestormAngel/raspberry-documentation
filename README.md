@@ -1043,9 +1043,6 @@ Now that we have functional accesspoints and are hopefully using them for our de
 #### Setting the right expectations
 NMAP is in first case an enumeration tool, to map networks. The plugins used by NMAP are small skripts to attempt to identify the simplest and probably the worst kind of vulnerabilities. NMAP is not full scale a vulnerability scanner, but a network mapper. Its primary usage is to detect whatever it is you have connected on your network.
 
-#### Permission to scan
-Before performing these steps, make sure you are authorized with a written permission from whoever owns the transit network. Don't scan networks from your Internet provider without written permission.
-
 #### Installation and configuration instructions
 In this section we will prepare a USB 3.0 storage for the upcomming chapters, add scheduled plugin downloads and network scans.
 
@@ -1161,7 +1158,12 @@ $ df -h
     tmpfs             365M      0   365M   0% /run/user/1000
 ```
 
-Step 7: Schedule NMAP tasks to download and scan networks.
+#### Permission to scan
+DISCLAIMER: Before performing this step, make sure you are authorized with a written permission from whoever owns the transit/outside network. 
+* Don't scan networks from your Internet provider without written permission.
+* Doing so, without permission might render your Internet connection - DEAD.
+
+Step 1: Schedule NMAP tasks to download and scan networks.
 ```bash
 $ crontab -e
 ```
