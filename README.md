@@ -1025,6 +1025,31 @@ $ sudo ipsec statusall
     vpnserver-dhcpclients{1923}:  AES_CBC_256/HMAC_SHA2_256_128, 12652 bytes_i (81 pkts, 52s ago), 26505 bytes_o (69 pkts, 52s ago), rekeying in 11 hours
     vpnserver-dhcpclients{1923}:   0.0.0.0/0 === 192.168.231.1/32
 ```
+#### Connecting your iPhone
+To add VPN on iPhone start the Settings app.
+
+In the Settings app, go to *General* > *VPN* > *Add VPN-configuration*.
+
+In the field Type, select *IKEv2*.
+
+In the field Description, add *wifi-03.firestorm.org*
+
+In the field Server, add *firestorm-cataclystic-0003.wifi.firestorm.org*
+
+In the field Serveraddress, add *192.168.230.254*
+
+In the field Remote-ID, add *wifi-03@wifi.firestorm.org*
+
+In the field Local-ID, add *yourdevice@wifi.firestorm.org*
+
+In the field Userauthentication, select *None* - this will prevent you from being prompted time and time again for username/password.
+
+In the field Use Certificate, select *off*
+
+In the field Secret, enter the pre-shared key that you selected in the ipsec.secret file.
+
+Select OK and start the IPsec connection.
+
 #### Troubleshooting
 
 #### Summary
