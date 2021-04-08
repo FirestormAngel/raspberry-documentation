@@ -441,18 +441,7 @@ Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/
     wpa_passphrase=<enter your password here. 20-32 characters recommended.>
     
 ```
-
-
-Enable traffic forwarding from your wlan0 card to eth0 physical network card.
-```bash
-$ sudo nano /etc/sysctl.conf
-```
-
-
-Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1*.
-```bash
-    net.ipv4.ip_forward=1
-```
+NOTE: See chapter 0x07 and 0x08 for forwarding enablement.
 
 
 The hostapd is masked, which means you cannot enable it per default. Unmask it and then enable it.
@@ -603,6 +592,18 @@ $ sudo nano /etc/hosts
     # we havent added docker yet, but this entry would be correct.
     #172.17.0.1      gate.docker.firestorm.org
 
+```
+
+#### routing
+
+Enable traffic forwarding from your wlan0 card to eth0 physical network card.
+```bash
+$ sudo nano /etc/sysctl.conf
+```
+
+Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1* to enable forwarding.
+```bash
+    net.ipv4.ip_forward=1
 ```
 
 #### iptables
