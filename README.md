@@ -280,15 +280,15 @@ in progress
 
 
 ### Chapter 0x06: Installing and configuring components for Wifi 802.11ac with WPA2-PSK
-in progress, also subject to change
+In this chapter we are going to install the hostapd, an essential component for making your Raspberry Pi 4 a wifi access point. This will enable the wlan0 adapter on the raspberry to act like a accesspoint. 
 
-In this chapter we are going to install the hostapd, an essential component for making your Raspberry Pi 4 a wifi access point. 
-
-* **Advice** This step will only enable the hostapd and make it start broadcasting its ssid name.
-* **Advice** Chapter 0x07, 0x08 are required to make the access point work.
+* **Advice** This chapter will only enable the hostapd and make it start broadcasting its ssid name.
+* **Advice** Chapter 0x07, 0x08 are required to make the access point start moving traffic through it.
 * **Advice** You will need to disable the wpa_supplicant.service
 
-If you are using your Raspberry Pi 4, wifi to connect to another accesspoint, now is the time to stop doing that.
+If you are using your Raspberry Pi 4, wifi to connect to another accesspoint, this will stop it from doing that. From now on your eth0 interface will be the outside/transit interface.
+
+Lets get started
 
 Update and upgrade your OS, then install the Wifi AccessPoint daemon.
 ```bash
@@ -349,6 +349,8 @@ $ sudo nano /etc/default/hostapd
 I have made a couple of hostapd configuration examples for you to select from. 
 * **Advice** Please select the one that is most appropriate for you.
 * **Advice** Read up on your documentation for your devices before selecting the one to choose.
+
+#### Choosing configuration
 
 ```bash
 $ sudo nano /etc/hostapd/hostapd.conf
@@ -439,8 +441,6 @@ Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/
     wpa_passphrase=<enter your password here. 20-32 characters recommended.>
     
 ```
-NOTE: See chapter 0x07 and 0x08 for forwarding enablement.
-
 
 The hostapd is masked, which means you cannot enable it per default. Unmask it and then enable it.
 ```bash
@@ -448,9 +448,9 @@ $ sudo systemctl unmask hostapd
 $ sudo systemctl enable hostapd
 ```
 
-Example: Check status of the hostapd.service
+Example: Stop the hostapd.service
 ```bash
-$ sudo systemctl status hostapd.service
+$ sudo systemctl stop hostapd.service
 ```
 
 Example: Start the hostapd.service
@@ -458,10 +458,47 @@ Example: Start the hostapd.service
 $ sudo systemctl start hostapd.service
 ```
 
-Example: Stop the hostapd.service
+Example: Check status of the hostapd.service
 ```bash
-$ sudo systemctl stop hostapd.service
+$ sudo systemctl status hostapd.service
 ```
+
+#### Verification
+Step 1: Run iwconfig to see if your hostapd mode.
+```bash
+$ sudo iwconfig
+```
+
+```bash
+    ...
+    wlan0     IEEE 802.11  Mode:Master  Tx-Power=31 dBm   
+              Retry short limit:7   RTS thr:off   Fragment thr:off
+              Power Management:on
+    ...
+```
+NOTE; The output should indicate that mode is master and that there is transmission power around 31dBm with your built in wifi card, wlan0.
+
+Step 2: Verify that wlan0 is acting as access point (AP), and that the channel is selected and working.
+```bash
+$ iw wlan0 info
+```
+```bash
+Interface wlan0
+	ifindex 3
+	wdev 0x1
+	addr xx:xx:xx:xx:xx:xx
+	ssid wifi-03.firestorm.org
+	type AP
+	wiphy 0
+	channel 48 (5240 MHz), width: 20 MHz, center1: 5240 MHz
+	txpower 31.00 dBm
+```
+
+
+#### Troubleshooting
+
+#### Summary
+This chapter has set the foundation accesspoint configuration for enabling the wifi 802.11 broadcasting.
 
 
 ### Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
