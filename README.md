@@ -290,31 +290,32 @@ If you are using your Raspberry Pi 4, wifi to connect to another accesspoint, th
 
 Lets get started
 
-Update and upgrade your OS, then install the Wifi AccessPoint daemon.
+#### Installing and configuring the hostapd.service
+
+Step 1: Update and upgrade your OS, then install the Wifi AccessPoint daemon.
 ```bash
 $ sudo apt-get update
 $ sudo apt-get upgrade
 $ sudo apt-get install hostapd -y
 ```
 
-Make sure the hostapd.service is stopped.
+Step 2: Make sure the hostapd.service is stopped.
 ```bash
 $ sudo systemctl stop hostapd
 ```
 
-Start by disabling the wpa_supplicant.service, which makes your raspberry a client to an external access point. From now on your raspberry is going to be the access point.
+Step 3: Start by disabling the wpa_supplicant.service, which makes your raspberry a client to an external access point. From now on your raspberry is going to be the access point.
 ```bash
 $ sudo systemclt stop wpa_supplicant.service
 $ sudo systemctl disable wpa_supplicant.service
 ```
 
-And if you really want to be sure its not used, then..
+Step 4: And if you really want to be sure its not used, then..
 ```bash
 $ sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.old
 ```
 
-
-Make sure your *hostapd.conf* is pointed out inside the file */etc/default/hostapd*.
+Step 5: Make sure your *hostapd.conf* is pointed out inside the file */etc/default/hostapd*.
 ```bash
 $ sudo nano /etc/default/hostapd
 ```
@@ -350,13 +351,13 @@ I have made a couple of hostapd configuration examples for you to select from.
 * **Advice** Please select the one that is most appropriate for you.
 * **Advice** Read up on your documentation for your devices before selecting the one to choose.
 
-#### Choosing configuration
+#### Selecting a configuration
 
 ```bash
 $ sudo nano /etc/hostapd/hostapd.conf
 ```
 
-Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/20Mhz. Recommended for iPhone 6 and upwards.
+**Example configuration 1**: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/20Mhz. Recommended for iPhone 6 and upwards.
 ```bash
 
     ########################################
@@ -442,6 +443,8 @@ Example configuration 1: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/
     
 ```
 
+#### Enabling, starting, stopping and checking the hostapd.service
+
 The hostapd is masked, which means you cannot enable it per default. Unmask it and then enable it.
 ```bash
 $ sudo systemctl unmask hostapd
@@ -464,7 +467,7 @@ $ sudo systemctl status hostapd.service
 ```
 
 #### Verification
-Step 1: Run iwconfig to see if your hostapd mode.
+Step 1: Run iwconfig to see if your hostapd mode is now set to **Master**.
 ```bash
 $ sudo iwconfig
 ```
@@ -476,9 +479,9 @@ $ sudo iwconfig
               Power Management:on
     ...
 ```
-NOTE; The output should indicate that mode is master and that there is transmission power around 31dBm with your built in wifi card, wlan0.
+NOTE; The output should indicate that mode is *master* and that there is transmission power around *31dBm* with your built in wifi card, *wlan0*.
 
-Step 2: Verify that wlan0 is acting as access point (AP), and that the channel is selected and working.
+Step 2: Verify that wlan0 is acting as access point, AP, and that the channel you selected is active and working.
 ```bash
 $ iw wlan0 info
 ```
@@ -494,16 +497,14 @@ Interface wlan0
 	txpower 31.00 dBm
 ```
 
-
 #### Troubleshooting
 
 #### Summary
-This chapter has set the foundation accesspoint configuration for enabling the wifi 802.11 broadcasting.
-
+This chapter has set the foundation for your accesspoint configuration and for enabling the wifi 802.11 broadcasting. It should be broadcasting its ssid now, but lets finish the next chapter before connecting to the ssid.
 
 ### Chapter 0x07: Installing and configuring components for DNS, DHCP, iptables
 
-#### Why do we need the dnsmasq service?
+#### Why do we need the dnsmasq.service?
 In this chapter we are going to enable dhcp and dns which will enable your accesspoint to configure any wifi attached devices with the ip addresses they will be using to navigate the wifi network. I'll be using dnsmasq since this probably is the most qualified software for this task.
 
 #### Set the right expectations
