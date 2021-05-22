@@ -262,11 +262,11 @@ $ sudo timedatectl set-timezone Australia/Sydney
 ```
 Example: Check the status the **systemd-timesyncd** service.
 ```bash
-$ systemctl status systemd-timesyncd
+$ sudo systemctl status systemd-timesyncd
 ```
 Example: Restart the **systemd-timesyncd** service.
 ```bash
-$ systemctl restart systemd-timesyncd
+$ sudo systemctl restart systemd-timesyncd
 ```
 #### Troubleshooting
 
@@ -295,8 +295,8 @@ Lets get started
 Step 1: Update and upgrade your OS, then install the Wifi AccessPoint daemon.
 ```bash
 $ sudo apt-get update
-$ sudo apt-get upgrade
-$ sudo apt-get install hostapd -y
+$ sudo apt-get upgrade -y
+$ sudo apt-get install -y hostapd
 ```
 
 Step 2: Make sure the hostapd.service is stopped.
@@ -304,10 +304,11 @@ Step 2: Make sure the hostapd.service is stopped.
 $ sudo systemctl stop hostapd
 ```
 
-Step 3: Start by disabling the wpa_supplicant.service, which makes your raspberry a client to an external access point. From now on your raspberry is going to be the access point.
+Step 3: Start by disabling and masking the wpa_supplicant.service, which makes your raspberry a client to an external access point. This will stop the wifi client on your Raspberry Pi.
 ```bash
 $ sudo systemclt stop wpa_supplicant.service
 $ sudo systemctl disable wpa_supplicant.service
+$ sudo systemctl mask wpa_supplicant.service
 ```
 
 Step 4: And if you really want to be sure its not used, then..
