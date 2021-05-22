@@ -548,8 +548,14 @@ Add the following entries.
     expand-hosts
     domain=internal.firestorm.org
     domain=wifi.firestorm.org,192.168.230.0/24
+    domain=ipsec.firestorm.org,192.168.231.0/24
+    
     # we havent added docker yet, but this entry would be correct.
     #domain=docker.firestorm.org,172.17.0.0/16
+    
+    # we havent added the ipsec pool yet, but a synthetic domain
+    # for non-dnsmasq ipsec pool would do the trick.
+    #synth-domain=ipsec.firestorm.org,192.168.231.0/24,ipsec-
 
     # listen for DNS request on these addresses.
     listen-address=192.168.230.254
@@ -851,6 +857,19 @@ $ sudo nano /etc/ipsec.secrets
 
     # EXAMPLE: yourdevice
     yourdevice@wifi.firestorm.org : PSK YourSuperLongPasswordHere
+```
+
+#### dnsmasq
+Go ahead and uncomment the ipsec.firestorm.org section in your dnsmasq.conf
+
+```bash
+$ sudo nano /etc/dnsmasq.conf
+```
+
+```bash
+    # we havent added the ipsec pool yet, but a synthetic domain
+    # for non-dnsmasq ipsec pool would do the trick.
+    synth-domain=ipsec.firestorm.org,192.168.231.0/24,ipsec-
 ```
 
 #### iptables
