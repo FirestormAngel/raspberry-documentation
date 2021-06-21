@@ -1251,7 +1251,7 @@ $ df -h
     tmpfs             5,0M   4,0K   5,0M   1% /run/lock
     tmpfs             1,8G      0   1,8G   0% /sys/fs/cgroup
     /dev/mmcblk0p1    253M    48M   205M  19% /boot
-    */dev/sda1          57G     0G    56G   0% /mnt/volume*
+    /dev/sda1          57G     0G    56G   0% /mnt/volume
     tmpfs             365M      0   365M   0% /run/user/1000
 ```
 
