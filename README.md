@@ -637,16 +637,42 @@ $ sudo nano /etc/hosts
 
 ```
 
-#### routing
+#### Enable forwarding for IPv4
 
 Enable traffic forwarding from your wlan0 card to eth0 physical network card.
 ```bash
 $ sudo nano /etc/sysctl.conf
 ```
 
-Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1* to enable forwarding.
+Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1* to enable IPv4 forwarding.
 ```bash
     net.ipv4.ip_forward=1
+```
+
+#### Disable forwarding for IPv6
+
+Disable traffic forwarding from your wlan0 card to eth0 physical network card.
+```bash
+$ sudo nano /etc/sysctl.conf
+```
+Example: Find *net.ipv6.conf.all.forwarding* inside your *sysctl.conf* and set it to *0* to disable IPV6 forwarding.
+```bash
+    net.ipv6.conf.all.forwarding=0
+```
+
+#### Disable IPv6
+
+Disable IPv6 on all network cards.
+```bash
+$ sudo nano /etc/sysctl.conf
+```
+Add the following lines
+```bash
+    net.ipv6.conf.all.disable_ipv6 = 1
+    net.ipv6.conf.default.disable_ipv6 = 1
+    net.ipv6.conf.lo.disable_ipv6 = 1
+    net.ipv6.conf.eth0.disable_ipv6 = 1
+    net.ipv6.conf.wlan0.disable_ipv6 = 1
 ```
 
 #### iptables
