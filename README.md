@@ -23,9 +23,9 @@ It should also be said, most of these chapters will come with extensive explanat
 * Chapter 0x0B: Hardware and Requirements
 * Chapter 0x0C: Installing and configuring components for Docker (repo and installation)
 * Chapter 0x0D: Installing and configuring components for Python3 environments.
-* Chapter 0x0E: Installing and configuring pcap recorder (2021-05-01)
-* Chapter 0x0F: Configuration of Python environment (2021-05-01)
-* Chapter 0x10: Configuration of Python environment for plugins for wifi-triangulation (2021-06-01)
+* Chapter 0x0E: Installing and configuring pcap recorder
+* Chapter 0x0F: Configuration of Python environment
+* Chapter 0x10: Configuration of Python environment for plugins for wifi-triangulation
 * More chapters in the pipe.
 
 ### Set the right expectations
@@ -1343,18 +1343,18 @@ in progress
 in progress
 
 
-### Chapter 0x0D: Installing and configuring components for Python3 environments (2021-05-01)
+### Chapter 0x0D: Installing and configuring components for Python3 environments
 in progress
 
 
-### Chapter 0x0E: Installing and configuring pcap recorder (2021-05-01)
+### Chapter 0x0E: Installing and configuring pcap recorder
 in progress
 
 
-### Chapter 0x0F: Configuration of Python environment (2021-05-01)
+### Chapter 0x0F: Configuration of Python environment
 in progress
 
 
-### Chapter 0x10: Configuration of Python environment for plugins for wifi-triangulation (2021-06-01)
+### Chapter 0x10: Configuration of Python environment for plugins for wifi-triangulation
 in progress
 
