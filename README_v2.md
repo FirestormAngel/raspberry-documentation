@@ -1,7 +1,4 @@
 # Raspberry-Documentation
-Official release date for the most basic installation instructions will be official here.
-Scripts and automation will come at a later date, when its more mature.
-
 Raspberry Pi 4 is a very capable little creditcard sized computer with a 4 Core ARM CPU. It comes with different boards, sizing 1GB, 2GB, 4GB and 8GB RAM. I have, for the most basic things in my test and online systems, always chosen the 4GB model and a 32GB SD card. Do not underestimate, these applications require both memory and CPU. Running it on Raspberry Pi 2, 3, 3B+, yes, it can be installed but will most likely fail or not perform well. Trust me, I've tried it already, I've been working on this for years.
 
 It should also be said, most of these chapters will come with extensive explanations, why and why not to do things. You might be able to follow if you are an intermediate to advanced user familiar with linux bash and configuration.
@@ -71,22 +68,62 @@ in progress, and subject to change
 ### Chapter 0x03: Configuring IP addresses on eth0 and wlan0
 in progress, and subject to change
 
-In this section we will assign static IPv4 addresses on your raspbian. If you have other networks you should assign them to the configuration below, and use the correct network and subnetmask for your network. I will however be consistent here, most people with a little knowledge do understand that if you work with this system remotely, you will be disconnected and will need to reconnect to the device, while restarting the service.
+In this section we will assign static IPv4 and IPv6 addresses on your ubuntu 22.04. If you have other networks you should assign them to the configuration below, and use the correct network and subnetmask for your network. I will however be consistent here, most people with a little knowledge do understand that if you work with this system remotely, you will be disconnected and will need to reconnect to the device, while restarting the service.
 
 * **Advice**: If you work with this device remotely, make sure you are entering the correct information, and that you are able to connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
 
 ```bash
-$ sudo nano /etc/netplan/10-router.conf
+$ sudo nano /etc/netplan/10-router.yaml
 ```
 
-And add/modify the the eth0 static IPv4 and IPv6 sections:
+And add/modify the the fixed interfaces static IPv4 and IPv6 sections:
 ```bash
-TODO
+network:
+
+    version: 2
+
+    ethernets:
+        eth0:
+            renderer: networkd
+            addresses: [ 192.168.220.1/24, fe80::1/64, fc00:220::1/64 ]
+            link-local: [ ]
+            accept-ra: false
+            dhcp4: false
+            dhcp6: false
+            optional: true
+            routes:
+                - to: 0.0.0.0/0
+                  via: 192.168.220.254
+                  on-link: false
+
+            nameservers:
+                search: [ "firestorm.org", "reserved-ipv4.firestorm.org", "reserved-ipv6.firestorm.org" ]
+                addresses: [ 192.168.220.1, fc00:220::1 ]
+
+        wlan0:
+            renderer: networkd
+            addresses: [ 192.168.230.1/24, fe80::1/64, fc00:230::1/64 ]
+            link-local: [ ]
+            accept-ra: false
+            dhcp4: false
+            dhcp6: false
+            optional: true
+
+            nameservers:
+                search: [ "firestorm.org", "wireless-ipv4.firestorm.org", "wireless-ipv6.firestorm.org" ]
+                addresses: [ 192.168.230.1, fc00:230::1 ]
+
+	## we will add a ipsec0 interface and a 4G modem in some following sections.
+
 ```
 
-And add/modify the wlan0 static IPv4 and IPv6 sections:
+To try out the configuration for 120 seconds:
 ```bash
-TODO
+$ sudo netplan try
+```
+To permanently apply the configuration:
+```bash
+$ sudo netplan apply
 ```
 
 ### Chapter 0x04: Synchronizing the time with Network Time Servers
@@ -225,30 +262,30 @@ Step 5: Make sure your *hostapd.conf* is pointed out inside the file */etc/defau
 $ sudo nano /etc/default/hostapd
 ```
 ```bash
-    # Defaults for hostapd initscript
-    #
-    # WARNING: The DAEMON_CONF setting has been deprecated and will be removed
-    #          in future package releases.
-    #
-    # See /usr/share/doc/hostapd/README.Debian for information about alternative
-    # methods of managing hostapd.
-    #
-    # Uncomment and set DAEMON_CONF to the absolute path of a hostapd configuration
-    # file and hostapd will be started during system boot. An example configuration 
-    # file can be found at /usr/share/doc/hostapd/examples/hostapd.conf.gz
-    #
-    # ** yes, enter it here.. even its deprecated **
-    DAEMON_CONF="/etc/hostapd/hostapd.conf"
+# Defaults for hostapd initscript
+#
+# WARNING: The DAEMON_CONF setting has been deprecated and will be removed
+#          in future package releases.
+#
+# See /usr/share/doc/hostapd/README.Debian for information about alternative
+# methods of managing hostapd.
+#
+# Uncomment and set DAEMON_CONF to the absolute path of a hostapd configuration
+# file and hostapd will be started during system boot. An example configuration 
+# file can be found at /usr/share/doc/hostapd/examples/hostapd.conf.gz
+#
+# ** yes, enter it here.. even its deprecated **
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
 
-    # Additional daemon options to be appended to hostapd command:-
-    #       -d   show more debug messages (-dd for even more)
-    #       -K   include key data in debug messages
-    #       -t   include timestamps in some debug messages
-    #
-    # Note that -B (daemon mode) and -P (pidfile) options are automatically
-    # configured by the init.d script and must not be added to DAEMON_OPTS.
-    #
-    #DAEMON_OPTS=""
+# Additional daemon options to be appended to hostapd command:-
+#       -d   show more debug messages (-dd for even more)
+#       -K   include key data in debug messages
+#       -t   include timestamps in some debug messages
+#
+# Note that -B (daemon mode) and -P (pidfile) options are automatically
+# configured by the init.d script and must not be added to DAEMON_OPTS.
+#
+#DAEMON_OPTS=""
 
 ```
 
@@ -264,7 +301,6 @@ $ sudo nano /etc/hostapd/hostapd.conf
 
 **Example configuration 1**: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/20Mhz. Recommended for iPhone 6 and upwards.
 ```bash
-
 ########################################
 ## This configuration will work with  ## 
 ## newer iPhone models, 6s and newer  ##
@@ -329,7 +365,7 @@ ignore_broadcast_ssid=0
 ########################################
 
 # enter ssid name here, make sure it does not conflict with another accesspoint.
-ssid=wifi-03.firestorm.org
+ssid=wifi-01.firestorm.org
     
 # enable authentication (1=enable, 0=disable)
 auth_algs=1
@@ -395,7 +431,7 @@ Interface wlan0
 	ifindex 3
 	wdev 0x1
 	addr xx:xx:xx:xx:xx:xx
-	ssid wifi-03.firestorm.org
+	ssid wifi-01.firestorm.org
 	type AP
 	wiphy 0
 	channel 48 (5240 MHz), width: 20 MHz, center1: 5240 MHz
@@ -403,6 +439,7 @@ Interface wlan0
 ```
 
 #### Troubleshooting
+TODO
 
 #### Summary
 This chapter has set the foundation for your accesspoint configuration and for enabling the wifi 802.11 broadcasting. It should be broadcasting its ssid now, but lets finish the next chapter before connecting to the ssid.
