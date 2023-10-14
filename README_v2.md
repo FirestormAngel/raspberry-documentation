@@ -6,7 +6,7 @@ It should also be said, most of these chapters will come with extensive explanat
 ### This will probably work on all Raspberry Pi 4 models.
 * Chapter 0x00: Hardware and Requirements
 * Chapter 0x01: Installing the raspberry SD card
-* Chapter 0x02: Update the Debian Buster image file
+* Chapter 0x02: Update the Ubuntu 22.04.3 image file
 * Chapter 0x03: Configuring IP addresses on eth0 and wlan0
 * Chapter 0x04: Synchronizing the time with Network Time Servers
 * Chapter 0x05: Installing and configuring components for RSyslog
@@ -58,21 +58,26 @@ in progress, and subject to change
 Warning! This device will be warm. This device is going to be online most of the day, and carrying a heavy load, so a proper aluminium armor without fan is probably a good idea. Just make sure the heated components are properly attached and leading away the heat from the components. I have had success with the GeekWorm Raspberry Pi 4 Armor Gray, thus leading the cpu at +53C.
 
 ### Chapter 0x01: Installing the raspberry ubuntu SD card
-in progress, and subject to change
+Downloading the Ubuntu Server 22.04.3 for Raspberry Pi. Follow the links [here](https://ubuntu.com/download/raspberry-pi)
 
-* Installing image from a Windows system.
-* Installing image from a Raspberry system.
+* Installing image to card from a Windows system [here]()
+* Installing image to card from a Raspberry system [here]()
 
-### Chapter 0x02: Update the Debian Buster image file
-in progress, and subject to change
+### Chapter 0x02: Update the Ubuntu 22.04.3 image file
+Always update the Ubuntu 22.04.3 image with the latest updates. There is always new updates available, so make this a best practise
+
+```bash
+$ sudo apt update
+$ sudo apt full-upgrade -y
+```
+
 
 ### Chapter 0x03: Configuring IP addresses on eth0 and wlan0
-in progress, and subject to change
+In this section we will assign static IPv4 and IPv6 addresses on your ubuntu 22.04. If you have other networks you should assign them to the configuration below, and use the correct network and subnetmask for your network. Remember to be consistent with your subnetmasks and ip subnet if you do.
 
-In this section we will assign static IPv4 and IPv6 addresses on your ubuntu 22.04. If you have other networks you should assign them to the configuration below, and use the correct network and subnetmask for your network. I will however be consistent here, most people with a little knowledge do understand that if you work with this system remotely, you will be disconnected and will need to reconnect to the device, while restarting the service.
+* **Advice**: If you work remotely via SSH, make sure you are entering the correct information, and that you are able to re-connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
 
-* **Advice**: If you work with this device remotely, make sure you are entering the correct information, and that you are able to connect to it afterwards. Changeing the IP address may render the device unavailable, even the device is online.
-
+Create a netplan configuration
 ```bash
 $ sudo nano /etc/netplan/10-router.yaml
 ```
@@ -118,7 +123,7 @@ network:
 
 ```
 
-To try out the configuration for 120 seconds:
+To try out the configuration for 120 seconds (configuration will be reverted after 120 sec, however the 01-router.conf file will not revert):
 ```bash
 $ sudo netplan try
 ```
@@ -128,21 +133,22 @@ $ sudo netplan apply
 ```
 
 ### Chapter 0x04: Synchronizing the time with Network Time Servers
-in progress, also subject to change
 
 #### Why do we need network time servers?
 Since your raspberry doesnt have a physical clock, its important to have it synchronize its clock with the configured network time servers available. Like anyone working with Cyber security, correct timestamps is of the essence in any evidence or logs. This to determine the correct timestamp something happened. Failing to do so, will render logs and evidence unusable.
 
 #### Set the right expectations
-Ok, you don't really have to change the *timesynccd* service, because it comes preinstalled on Debian Buster, however it is a good idea to have knowledge about this service existance, and that you don't need to install the ntp service. The NTP service which in turn will open port UDP/123, opening a footprint for traffic towards your Raspberry. The ntp service is complicated to secure, so unless you know how, don't use it.
+Ok, you don't really have to change the *timesynccd* service, because it comes preinstalled on Ubuntu, however it is a good idea to have knowledge about this service existance, and that you don't need to install the ntp service. The ntpd service which in turn will open port UDP/123 and its also hard to secure properly. Chronyd is the newest timesync service available, and it supports the ntps protocol with certificates and encryption, its also a little bit easier to manage and configure.
+
+I'n my case, lets keep it simple and use timesyncd.
 
 #### Examples
 
 Example: The location of your NTP (Network Time Protocol) server configuration
 ```bash
 $ sudo nano /etc/systemd/timesyncd.conf
-
 ```
+
 Example: I've made an example if you want to choose your own NTP servers.
 ```configuration
 #  This file is part of systemd.
@@ -167,8 +173,7 @@ PollIntervalMaxSec=2048
 ```
 * **Advice**: You can uncomment the *FallbackNTP* and *RootDistanceMaxSec* if you want to have a NTP fallback and make sure your NTP servers answer within 5 seconds. This is recommended.
 
-* **Advice**: The *PollIntervalMinSec* and *PollIntervalMaxSec* is the interval frame between sending ntp requests to the destinations. A value below 64 seconds is *not* recommended, unless you wish to be *blacklisted* on the ntp providers. *So, don't go below 64 seconds*.
-
+* **Advice**: The *PollIntervalMinSec* and *PollIntervalMaxSec* is the interval frame between sending ntp requests to the destinations. A value below 64 seconds is *not* recommended.
 
 Example: Check if the time is synchronized.
 ```bash
