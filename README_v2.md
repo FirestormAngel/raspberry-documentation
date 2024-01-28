@@ -84,6 +84,20 @@ $ sudo nano /etc/netplan/10-router.yaml
 
 And add/modify the the fixed interfaces static IPv4 and IPv6 sections:
 ```bash
+########################################
+## If you use this material, in any   ##
+## writing or tutorials, you need to  ##
+## refer to the original. Atleast     ##
+## mention my name, my linkedin       ##
+## profile, git page or website.      ##
+##                                    ##
+## Thankyou,                          ##
+## Now, lets get ready for war..      ##
+##                                    ##
+## Author: Jens Madsen                ##
+## Copyright                          ##
+########################################
+
 network:
 
     version: 2
@@ -336,6 +350,20 @@ $ sudo nano /etc/hostapd/hostapd.conf
 **Example configuration 1**: Wireless 802.11ac on 5Ghz, on channel 48, bandwidth 20/20Mhz. Recommended for iPhone 6 and upwards.
 ```bash
 ########################################
+## If you use this material, in any   ##
+## writing or tutorials, you need to  ##
+## refer to the original. Atleast     ##
+## mention my name, my linkedin       ##
+## profile, git page or website.      ##
+##                                    ##
+## Thankyou,                          ##
+## Now, lets get ready for war..      ##
+##                                    ##
+## Author: Jens Madsen                ##
+## Copyright                          ##
+########################################
+
+########################################
 ## This configuration will work with  ## 
 ## newer iPhone models, 6s and newer  ##
 ## Android phones.                    ##
@@ -519,6 +547,19 @@ Create a new /etc/dnsmasq.d/10-eth0.conf, by adding the following common entries
 $ sudo nano /etc/dnsmasq.d/10-eth0.conf
 ```
 ```bash
+########################################
+## If you use this material, in any   ##
+## writing or tutorials, you need to  ##
+## refer to the original. Atleast     ##
+## mention my name, my linkedin       ##
+## profile, git page or website.      ##
+##                                    ##
+## Thankyou,                          ##
+## Now, lets get ready for war..      ##
+##                                    ##
+## Author: Jens Madsen                ##
+## Copyright                          ##
+########################################
 server=1.1.1.1#53
 server=1.0.0.1#53
 
@@ -578,6 +619,19 @@ $ sudo nano /etc/dnsmasq.d/10-wlan0.conf
 ```
 
 ```bash
+########################################
+## If you use this material, in any   ##
+## writing or tutorials, you need to  ##
+## refer to the original. Atleast     ##
+## mention my name, my linkedin       ##
+## profile, git page or website.      ##
+##                                    ##
+## Thankyou,                          ##
+## Now, lets get ready for war..      ##
+##                                    ##
+## Author: Jens Madsen                ##
+## Copyright                          ##
+########################################
 server=1.1.1.3#53
 server=1.0.0.3#53
 
@@ -658,6 +712,19 @@ Create a new /etc/dnsmasq.d/10-ipsec.conf, by adding the following common entrie
 $ sudo nano /etc/dnsmasq.d/10-ipsec0.conf
 ```
 ```bash
+########################################
+## If you use this material, in any   ##
+## writing or tutorials, you need to  ##
+## refer to the original. Atleast     ##
+## mention my name, my linkedin       ##
+## profile, git page or website.      ##
+##                                    ##
+## Thankyou,                          ##
+## Now, lets get ready for war..      ##
+##                                    ##
+## Author: Jens Madsen                ##
+## Copyright                          ##
+########################################
 server=1.1.1.1#53
 server=1.0.0.1#53
 
@@ -771,6 +838,20 @@ $ sudo nano /etc/nftables.conf
 #!/usr/sbin/nft -f
 
 flush ruleset
+
+########################################
+## If you use this material, in any   ##
+## writing or tutorials, you need to  ##
+## refer to the original. Atleast     ##
+## mention my name, my linkedin       ##
+## profile, git page or website.      ##
+##                                    ##
+## Thankyou,                          ##
+## Now, lets get ready for war..      ##
+##                                    ##
+## Author: Jens Madsen                ##
+## Copyright                          ##
+########################################
 
 define DEV_GLOBAL         = wwan0
 
