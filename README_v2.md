@@ -502,6 +502,7 @@ $ sudo apt install dnsmasq dnsutils tcpdump -y
 $ sudo systemctl stop dnsmasq
 $ sudo systemctl stop hostapd
 ```
+
 #### Dnsmasq configuration instructions
 Edit /etc/dnsmasq.conf
 ```bash
@@ -511,8 +512,9 @@ Find this line and make sure its not commented.
 ```bash
 conf-dir=/etc/dnsmasq.d/,*.conf
 ```
+
 #### Dnsmasq eth0 configuration
-Create a new dnsmasq.d/10-eth0.conf by adding the following common entries.
+Create a new /etc/dnsmasq.d/10-eth0.conf, by adding the following common entries.
 ```bash
 $ sudo nano /etc/dnsmasq.d/10-eth0.conf
 ```
@@ -570,7 +572,7 @@ enable-ra
 
 ```
 #### Dnsmasq wlan0 configuration
-Create a new dnsmasq.d/10-wlan0.conf by adding the following common entries.
+Create a new /etc/dnsmasq.d/10-wlan0.conf, by adding the following common entries.
 ```bash
 $ sudo nano /etc/dnsmasq.d/10-wlan0.conf
 ```
@@ -630,16 +632,18 @@ enable-ra
 ########################################
 
 ```
+
 #### Dnsmasq script configuration
-Create a new /etc/dnsmasq.d/10-script.conf by adding the following common entries.
+Create a new /etc/dnsmasq.d/10-script.conf, by adding the following common entries.
 ```bash
 $ sudo nano /etc/dnsmasq.d/10-script.conf
 ```
 ```bash
 dhcp-script=/bin/echo
 ```
+
 #### Dnsmasq logging configuration
-Create a new /etc/dnsmasq.d/10-logging.conf by adding the following common entries.
+Create a new /etc/dnsmasq.d/10-logging.conf, by adding the following common entries.
 ```bash
 $ sudo nano /etc/dnsmasq.d/10-logging.conf
 ```
@@ -647,8 +651,9 @@ $ sudo nano /etc/dnsmasq.d/10-logging.conf
 log-queries
 log-dhcp
 ```
+
 #### Dnsmasq ipsec0 configuration (optional at this point)
-Create a new /etc/dnsmasq.d/10-ipsec.conf by adding the following common entries.
+Create a new /etc/dnsmasq.d/10-ipsec.conf, by adding the following common entries.
 ```bash
 $ sudo nano /etc/dnsmasq.d/10-ipsec0.conf
 ```
@@ -686,8 +691,6 @@ synth-domain=ipsec-ipv6.firestorm.org,fe80::/64,device
 ########################################
 
 ```
-
-
 
 Add static dns records for your dnsmasq installation.
 ```bash
