@@ -734,7 +734,7 @@ $ sudo nano /etc/sysctl.conf
 
 Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1* to enable IPv4 forwarding.
 ```bash
-    net.ipv4.ip_forward=1
+net.ipv4.ip_forward=1
 ```
 
 #### Enable forwarding for IPv6
@@ -745,7 +745,7 @@ $ sudo nano /etc/sysctl.conf
 ```
 Example: Find *net.ipv6.conf.all.forwarding* inside your *sysctl.conf* and set it to *1* to enable IPV6 forwarding.
 ```bash
-    net.ipv6.conf.all.forwarding=1
+net.ipv6.conf.all.forwarding=1
 ```
 
 #### nftables
@@ -762,75 +762,465 @@ IMPORTANT; Although this is the correct way to do this, do note that the above s
 #### Making a permanent network address translation (NAT) on your raspberry
 Networking and iptables on Linux is difficult subject for people who are not familiar with network configurations. In other words this section could work for you, or it could bring you a lot of headache. I'll try to keep this as simple and easy as possible and in each chapter from here, add more detail.
 
-* Step 1: Add a iptables configuration file on disk
-* Step 2: Add the permanent statements to the configuration file
-* Step 3: Add the raspberry load the iptables configuration at startup
-* Step 4: Load the iptables configuration
-* Step 5: Verify the ip tables configuration
+Step 1: Add a /etc/nftables.conf configuration file, and add the following configuration
 
-
-Step 1: Add a iptables configuration file on disk
-
-Step 1.1: Create the configuration file
 ```bash
-$ sudo touch /etc/iptables.ipv4.nat
-```
-
-Step 1.2: Add ownership to user root and group root
-```bash
-$ sudo chown root:root /etc/iptables.ipv4.nat
-```
-
-Step 1.3: Set the access rights for root read/write, group read and everyone read
-```bash
-$ sudo chmod 644 /etc/iptables.ipv4.nat
-```
-
-Step 2: Add the permanent statements to the configuration file
-```bash
-$ sudo nano /etc/iptables.ipv4.nat
+$ sudo nano /etc/nftables.conf
 ```
 ```bash
+#!/usr/sbin/nft -f
 
-```
-WARNING; This iptables configuration is permissive to just get you started, please do not connect any of the physical interfaces with this configuration to any unsecured network, such as Internet. This would be a very bad idea. We will touch this subject further, and secure the iptables rules in the upcomming chapters.
+flush ruleset
 
-* ACCEPT - will allow all traffic.
-* DROP - will drop packages without sending a tcp reset. 
+define DEV_GLOBAL         = wwan0
+
+define DEV_LOOPBACK       = lo
+define NET_LOOPBACK_V4    = { 127.0.0.1/8 }
+define NET_LOOPBACK_V6    = { ::1 }
+
+define NET_UNSPECIFIED_V4 = { 0.0.0.0/0 }
+define NET_UNSPECIFIED_V6 = { ::/0 }
+
+define NET_LINKLOCAL_V4   = { 169.254.0.0/16 }
+define NET_LINKLOCAL_V6   = { fe80::/64 }
+
+define NET_NTPSERVERS     = { ntp1.sptime.se, ntp2.sptime.se, ntp3.sptime.se, ntp4.sptime.se }
+define NET_DNSSERVERS     = { 83.255.255.1, 83.255.255.2, 1.1.1.1, 1.0.0.1, 1.1.1.3, 1.0.0.3 }
+
+########################################
+## MULTICAST DESTINATIONS             ##
+########################################
+
+## TODO
+define NET_224_1          = { 224.0.0.1 }
+define NET_FF02_1         = { ff02::1 }
+
+## Internet Group Management Protocol (IGMP).
+define NET_IGMP_V4        = { 224.0.0.22 }
+
+## Multicast Listener Discovery version 2. (MLDv2)
+define NET_MLDV2_V6       = { ff02::16/8 }
+
+## Multicast DNS (mDNS).
+define NET_MDNS_V4        = { 224.0.0.251 }
+define NET_MDNS_V6        = { ff02::fb/8 }
+
+## Link Local Multicast Name Resolution (LLMNR).
+define NET_LLMNR_V4       = { 224.0.0.252 }
+
+########################################
+##                                    ##
+########################################
+
+define DEV_PRIVATE        = eth0
+define NET_PRIVATE_V4     = { 192.168.220.0/24 }
+define NET_PRIVATE_V6     = { fc00:220::/64 }
+
+define DEV_WIRELESS       = wlan0
+define NET_WIRELESS_V4    = { 192.168.230.0/24 }
+define NET_WIRELESS_V6    = { fc00:230::/64 }
+
+define DEV_IPSEC0         = ipsec0
+define NET_IPSEC0_V4      = { 192.168.231.0/24 }
+define NET_IPSEC0_V6      = { fc00:231::/64 }
+
+define DEV_IPSEC1         = ipsec0
+define NET_IPSEC1_V4      = { 192.168.232.0/24 }
+define NET_IPSEC1_V6      = { fc00:232::/64 }
+
+########################################
+## Your original configuraiton        ##
+########################################
+
+#table inet filter {
+#       chain input {
+#               type filter hook input priority filter;
+#       }
+#       chain forward {
+#               type filter hook forward priority filter;
+#       }
+#       chain output {
+#               type filter hook output priority filter;
+#       }
+#}
+
+########################################
+## Your new configuraiton             ##
+########################################
+
+table inet firewall-filter {
 
 
-Step 3: Add the raspberry load the iptables configuration at startup
-```bash
-$ sudo nano /etc/rc.local
-```
-```bash
+        set whitelist-ipv4 {
+                type ipv4_addr
+                size 65535
+                flags timeout
+        }
 
-    # Add the iptables-restore statement here to load the 
-    # iptables.ipv4.nat configuration, just before the 
-    # exit 0 statement. 
-    iptables-restore < /etc/iptables.ipv4.nat
+        set whitelist-ipv6 {
+                type ipv6_addr
+                size 65535
+                flags timeout
+        }
 
-    exit 0
-```
 
-Step 4: Load the iptables configuration
-```bash
-$ sudo iptables-restore < /etc/iptables.ipv4.nat
-```
+        set blacklist-ipv4 {
+                type ipv4_addr
+                flags timeout
+                timeout 3h
+        }
 
-Step 5: Verify the ip tables configuration
-```bash
-$ sudo iptables-save
-```
-```bash
-$ sudo iptables -L -v -n
+        set blacklist-ipv6 {
+                type ipv6_addr
+                flags timeout
+                timeout 3h
+        }
+
+
+        set malicious-ipv4 {
+                type ipv4_addr
+                size 128000
+                flags dynamic
+        }
+
+        set malicious-ipv6 {
+                type ipv6_addr
+                size 128000
+                flags dynamic
+        }
+
+        chain firewall-inbound-global {
+
+                type filter hook input priority 0; policy drop;
+
+                iifname $DEV_GLOBAL    jump firewall-inbound-wan
+                iifname $DEV_LOOPBACK  jump firewall-inbound-loopback
+                iifname $DEV_WIRELESS  jump firewall-inbound-wireless
+                iifname $DEV_PRIVATE   jump firewall-inbound-private
+                iifname $DEV_IPSEC0    jump firewall-inbound-ipsec0
+                log prefix "NFT-INBOUND-GLOBAL-DROP " level debug counter drop
+        }
+
+        chain blacklist-drops {
+                log prefix "NFT-BLACKLIST-DROP " level debug counter drop
+        }
+
+        chain blacklist-rejects {
+                log prefix "NFT-BLACKLIST-REJECT " level debug counter reject
+        }
+
+        chain firewall-inbound-wan {
+
+                ## deny blacklisted connections on inbound wan.
+                #ip  saddr @blacklist-ipv4 counter drop
+                #ip6 saddr @blacklist-ipv6 counter drop
+                ip  saddr @blacklist-ipv4 jump blacklist-drops
+                ip6 saddr @blacklist-ipv6 jump blacklist-drops
+
+                ## allow only established connections on inbound wan.
+                ct state invalid counter drop
+                ct state established,related counter accept
+
+                ##ct state new tcp flags syn tcp dport { 80, 443, 8000, 8080, 8443, 9000, 9090, 9443 } add @malicious-ipv4 { ip saddr ct count over 1 }  add @blacklist-ipv4 { ip saddr timeout 5m }  drop
+                ##ct state new tcp flags syn tcp dport { 80, 443, 8000, 8080, 8443, 9000, 9090, 9443 } add @malicious-ipv4 { ip saddr ct count over 3 }  add @blacklist-ipv4 { ip saddr timeout 5m }  drop
+                ##ct state new,untracked tcp flags syn tcp dport { 80, 443, 8000, 8080, 8443, 9000, 9090, 9443 } ct count over 3 add @malicious-ipv4 { ip  saddr ct count over 3 } add @blacklist-ipv4 { ip  saddr timeout 5m } drop
+
+                ct state new,untracked tcp flags syn tcp dport { 22, 80, 1433, 5900, 5901 } add @blacklist-ipv4 { ip  saddr timeout 6h } drop
+                ct state new,untracked tcp flags syn tcp dport { 22, 80, 1433, 5900, 5901 } add @blacklist-ipv6 { ip6 saddr timeout 6h } drop
+
+                ct state new,untracked tcp flags syn tcp dport { 80, 443, 8000, 8080, 8443, 9000, 9090, 9443 } limit rate over 2/second add @blacklist-ipv4 { ip  saddr timeout 5m } drop
+                ct state new,untracked tcp flags syn tcp dport { 80, 443, 8000, 8080, 8443, 9000, 9090, 9443 } add @malicious-ipv6 { ip6 saddr ct count over 3 } add @blacklist-ipv6 { ip6 saddr timeout 5m } drop
+
+                ## enable IPSec traffic isakmp (UDP/500) and ipsec-t-nat (UDP/4500)
+                ## enable IPSec encapsulated security protocol (ESP).
+                udp dport { isakmp, ipsec-nat-t } log prefix "NFT-WAN-IPSEC-ALLOW " level debug counter accept comment "accept isakmp and ipsec nat traversal."
+                ip protocol { esp } counter accept comment "accept ESP"
+
+                ip6 saddr $NET_LINKLOCAL_V6   icmpv6 type { 130, 131 } accept
+                ip6 saddr $NET_UNSPECIFIED_V6 icmpv6 type { 130, 131 } accept
+
+                log prefix "NFT-INBOUND-WAN-DROP " level debug counter drop
+        }
+
+        chain firewall-inbound-loopback {
+                ct state invalid counter drop
+                ct state new,established,related counter accept
+                log prefix "NFT-INBOUND-LOOPBACK-DROP " level debug counter packets 0 bytes 0 drop
+        }
+
+        chain firewall-inbound-wireless {
+
+                ## reject blacklisted connections on inbound wireless.
+                #ip  daddr @blacklist-ipv4 counter reject
+                #ip6 daddr @blacklist-ipv6 counter reject
+                ip  daddr @blacklist-ipv4 jump blacklist-rejects
+                ip6 daddr @blacklist-ipv6 jump blacklist-rejects
+
+                ct state invalid counter drop
+                ct state new,established,related counter accept
+
+                # icmp
+                icmp type echo-request accept
+                icmpv6 type { echo-request, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+
+                udp dport mdns ip  daddr $NET_MDNS_V4 accept comment "permit IPv4 mDNS multicast"
+                udp dport mdns ip6 daddr $NET_MDNS_V6 accept comment "permit IPv6 mDNS multicast"
+
+                udp dport 53 accept comment "permit DNS on port 53"
+                tcp dport 53 accept comment "permit DNS on port 53"
+
+                udp dport { isakmp, ipsec-nat-t } counter accept comment "permit ISAKMP and IPsec NAT traversal"
+                ip protocol { esp } counter accept comment "permit ESP"
+
+                #ip6 saddr @LANv6 jump my_input_lan comment "Connections from private IP address ranges"
+                #ip saddr @LANv4 jump my_input_lan comment "Connections from private IP address ranges"
+
+                tcp dport ssh accept comment "permit SSH on port 22"
+                #tcp dport ipp accept comment "permit IPP/IPPS on port 631"
+                tcp dport { http, https, 8008, 8080 } accept comment "permit http traffic on 80, 443, 8008, 8080"
+
+                udp sport bootpc udp dport bootps ip saddr 0.0.0.0 ip daddr 255.255.255.255 accept comment "permit DHCPDISCOVER (for DHCP-Proxy)"
+
+                ip protocol . th dport vmap {
+                        tcp . 22  : accept,
+                        udp . 53  : accept,
+                        tcp . 53  : accept,
+                        udp . 67  : accept
+                }
+
+                log prefix "NFT-INBOUND-WIRELESS-DROP " level debug counter packets 0 bytes 0 drop
+        }
+
+        chain firewall-inbound-private {
+
+                ## reject blacklisted connections on inbound private.
+                #ip  daddr @blacklist-ipv4 counter reject
+                #ip6 daddr @blacklist-ipv6 counter reject
+                ip  daddr @blacklist-ipv4 jump blacklist-rejects
+                ip6 daddr @blacklist-ipv6 jump blacklist-rejects
+
+                ct state invalid counter drop
+                ct state new,established,related counter accept
+
+                # icmp
+                icmp type echo-request accept
+                icmpv6 type { echo-request, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+
+                ip protocol . th dport vmap {
+                        tcp . 22 : accept,
+                        udp . 53 : accept,
+                        tcp . 53 : accept,
+                        udp . 67 : accept
+                }
+
+                log prefix "NFT-INBOUND-PRIVATE-DROP " level debug counter drop
+        }
+
+        chain firewall-inbound-ipsec0 {
+
+                ## reject blacklisted connections on inbound ipsec.
+                #ip  daddr @blacklist-ipv4 counter reject
+                #ip6 daddr @blacklist-ipv6 counter reject
+                ip  daddr @blacklist-ipv4 jump blacklist-rejects
+                ip6 daddr @blacklist-ipv6 jump blacklist-rejects
+
+                ct state invalid counter drop
+                ct state new,established,related counter accept
+
+                # icmp
+                icmp type echo-request accept
+                icmpv6 type { echo-request, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+
+                log prefix "NFT-INBOUND-IPSEC0-DROP " level debug counter drop
+        }
+
+       chain firewall-forward {
+
+                type filter hook forward priority 0; policy drop;
+
+                ct state vmap {
+                        established : accept,
+                        related     : accept,
+                        invalid     : drop
+                }
+
+                iifname $DEV_PRIVATE  accept
+                iifname $DEV_WIRELESS accept
+                iifname $DEV_IPSEC0   accept
+
+                log prefix "NFT-FORWARD-DROP " level debug counter drop
+        }
+
+        chain firewall-outbound {
+
+                type filter hook output priority 0; policy accept;
+
+                oifname $DEV_LOOPBACK  jump firewall-outbound-loopback
+                oifname $DEV_GLOBAL    jump firewall-outbound-wan
+                oifname $DEV_WIRELESS  jump firewall-outbound-wireless
+                oifname $DEV_PRIVATE   jump firewall-outbound-private
+                oifname $DEV_IPSEC0    jump firewall-outbound-ipsec0
+                log prefix "NFT-OUTBOUND-GLOBAL-DROP " level debug counter drop
+        }
+
+        chain firewall-outbound-loopback {
+
+                ct state vmap {
+                        new         : accept,
+                        established : accept,
+                        related     : accept,
+                        invalid     : drop
+                }
+
+                icmpv6 type { echo-reply, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+                ip6 saddr $NET_LINKLOCAL_V6   icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+                ip6 saddr $NET_UNSPECIFIED_V6 icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+
+                log prefix "NFT-OUTBOUND-LOOPBACK-DROP " level debug counter drop
+        }
+
+        chain firewall-outbound-wan {
+
+                ct state vmap {
+                        new         : accept,
+                        established : accept,
+                        related     : accept,
+                        invalid     : drop
+                }
+
+                icmpv6 type { echo-reply, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+                ip6 saddr $NET_LINKLOCAL_V6   icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+                ip6 saddr $NET_UNSPECIFIED_V6 icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+
+                log prefix "NFT-OUTBOUND-WAN-DROP " level debug counter drop
+        }
+
+        chain firewall-outbound-wireless {
+
+                ct state vmap {
+                        new         : accept,
+                        established : accept,
+                        related     : accept,
+                        invalid     : drop
+                }
+
+                icmpv6 type { echo-reply, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+                ip6 saddr $NET_LINKLOCAL_V6   icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+                ip6 saddr $NET_UNSPECIFIED_V6 icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+
+                log prefix "NFT-OUTBOUND-WIRELESS-DROP " level debug counter drop
+        }
+
+        chain firewall-outbound-private {
+
+                ct state vmap {
+                        new         : accept,
+                        established : accept,
+                        related     : accept,
+                        invalid     : drop
+                }
+
+                icmpv6 type { echo-reply, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+                ip6 saddr $NET_LINKLOCAL_V6   icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+                ip6 saddr $NET_UNSPECIFIED_V6 icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+
+                log prefix "NFT-OUTBOUND-PRIVATE-DROP " level debug counter drop
+        }
+
+        chain firewall-outbound-ipsec0 {
+
+                ct state vmap {
+                        new         : accept,
+                        established : accept,
+                        related     : accept,
+                        invalid     : drop
+                }
+
+                icmpv6 type { echo-reply, nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit, nd-router-advert, mld-listener-query, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+                ip6 saddr $NET_LINKLOCAL_V6   icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+                ip6 saddr $NET_UNSPECIFIED_V6 icmpv6 type { 130, 131, 132, 143, 151, 152, 153 } accept
+
+                log prefix "NFT-OUTBOUND-IPSEC-DROP " level debug counter drop
+        }
+}
+
+table netdev firewall-ingress {
+
+        chain ingress {
+
+                type filter hook ingress device $DEV_PRIVATE priority -500;
+
+                # Drop all fragments.
+                ip frag-off & 0x1fff != 0 counter drop
+
+                # Drop XMAS packets.
+                tcp flags & (fin|syn|rst|psh|ack|urg) == fin|syn|rst|psh|ack|urg counter drop
+
+                # Drop NULL packets.
+                tcp flags & (fin|syn|rst|psh|ack|urg) == 0x0 counter drop
+
+                # Drop uncommon MSS values.
+                tcp flags syn tcp option maxseg size 1-535 counter drop
+        }
+}
+
+table inet firewall-nat {
+
+        chain PREROUTING {
+                type nat hook prerouting priority -100; policy accept;
+        }
+
+        chain POSTROUTING {
+
+                type nat hook postrouting priority 100; policy accept;
+
+                ## permissions for loopback
+                ip  saddr $NET_LOOPBACK_V4    oifname $DEV_LOOPBACK masquerade comment "permit ipv4 loopback"
+                ip6 saddr $NET_LOOPBACK_V6    oifname $DEV_LOOPBACK masquerade comment "permit ipv6 loopback"
+
+                ## permissions for linklocal non-routable traffic.
+                ip6 saddr $NET_LINKLOCAL_V6   oifname $DEV_PRIVATE  masquerade comment "permit ipv6 linklocal on device private"
+                ip6 saddr $NET_LINKLOCAL_V6   oifname $DEV_WIRELESS masquerade comment "permit ipv6 linklocal on device wireless"
+                ip6 saddr $NET_LINKLOCAL_V6   oifname $DEV_IPSEC0   masquerade comment "permit ipv6 linklocal on device wireless"
+
+                ## permissions for routing traffic back on to their original network. (mylan-to-mylan)
+                ip  daddr $NET_PRIVATE_V4     oifname $DEV_PRIVATE  masquerade comment "permit return private traffic back out on private"
+                ip6 daddr $NET_PRIVATE_V6     oifname $DEV_PRIVATE  masquerade comment "permit return private traffic back out on private"
+                ip  daddr $NET_WIRELESS_V4    oifname $DEV_WIRELESS masquerade comment "permit return wireless traffic back out on wireless"
+                ip6 daddr $NET_WIRELESS_V6    oifname $DEV_WIRELESS masquerade comment "permit return wireless traffic back out on wireless"
+                ip  daddr $NET_IPSEC0_V4      oifname $DEV_IPSEC0   masquerade comment "permit return ipsec traffic back out on ipsec0"
+                ip6 daddr $NET_IPSEC0_V6      oifname $DEV_IPSEC0   masquerade comment "permit return ipsec traffic back out on ipsec0"
+
+                ## permissions for all networks to masquerade on global interface.
+                ip  saddr $NET_PRIVATE_V4     oifname $DEV_GLOBAL   masquerade comment "permit src private v4 to masquerade on device global"
+                ip6 saddr $NET_PRIVATE_V6     oifname $DEV_GLOBAL   masquerade comment "permit src private v6 to masquerade on device global"
+                ip  saddr $NET_WIRELESS_V4    oifname $DEV_GLOBAL   masquerade comment "permit src wireless v4 to masquerade on device global"
+                ip6 saddr $NET_WIRELESS_V6    oifname $DEV_GLOBAL   masquerade comment "permit src wireless v6 to masquerade on device global"
+                #ip  saddr $NET_IPSEC0_V4      oifname $DEV_GLOBAL   masquerade comment "permit src ipsec v4 to masquerade on device global"
+                #ip6 saddr $NET_IPSEC0_V6      oifname $DEV_GLOBAL   masquerade comment "permit src ipsec v6 to masquerade on device global"
+
+                ## permissions for unspecified networks on global output chain.
+                ip  saddr $NET_UNSPECIFIED_V4 oifname $DEV_IPSEC0   masquerade comment "permit 0.0.0.0/0 ipv4 to masquerade 0.0.0.0/0 on device global"
+                ip6 saddr $NET_UNSPECIFIED_V6 oifname $DEV_IPSEC0   masquerade comment "permit ::0/0     ipv6 to masquerade ::0/0     on device global"
+
+                ip  saddr $NET_UNSPECIFIED_V4 oifname $DEV_GLOBAL   masquerade comment "permit 0.0.0.0/0 ipv4 to masquerade 0.0.0.0/0 on device global"
+                ip6 saddr $NET_UNSPECIFIED_V6 oifname $DEV_GLOBAL   masquerade comment "permit ::0/0     ipv6 to masquerade ::0/0     on device global"
+
+                log prefix "NFT-POSTROUTING-DROP " level debug counter drop
+        }
+}
+
+########################################
+##                                    ##
+########################################
+
 ```
 
 #### Troubleshooting
 TODO
 
 #### Summary
-The chapters until here has taken you all the way to get your Raspberry Pi up and running as a simple wifi accesspoint. We have added the dnsmasq configuration, with both dns-, dhcp-, hostnames- and some basic iptables configuration. As I wrote, iptables are somewhat complex for beginners, I promise we will be touching the nftables configuration in further chapters. From this point we will be securing the configurations.
+The chapters until here has taken you all the way to get your Raspberry Pi up and running as a simple wifi accesspoint. We have added the dnsmasq configuration, with both dns-, dhcp-, hostnames- and added a quite advanced nftables configuration. As I wrote, nftables are somewhat complex for beginners, I promise we will be touching the nftables configuration in further chapters. From this point we will be securing the configurations.
 
 ![2 Raspberry Pi 4 accesspoints](images/raspberrypi_accesspoints.JPG)
 
