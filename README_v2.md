@@ -97,6 +97,8 @@ network:
             dhcp4: false
             dhcp6: false
             optional: true
+
+            ## this section will be commented, when we add the 4G modem.
             routes:
                 - to: 0.0.0.0/0
                   via: 192.168.220.254
@@ -119,7 +121,33 @@ network:
                 search: [ "firestorm.org", "wireless-ipv4.firestorm.org", "wireless-ipv6.firestorm.org" ]
                 addresses: [ 192.168.230.1, fc00:230::1 ]
 
-	## we will add a ipsec0 interface and a 4G modem in some following sections.
+	## we will add a ipsec0 interface in the following sections, then we will uncomment these.
+        #ipsec0:
+        #    renderer: networkd
+        #    addresses: [ 192.168.231.1/24, fe80::1/64, fc00:231::1/64 ]
+        #    link-local: [ ]
+        #    accept-ra: false
+        #    dhcp4: false
+        #    dhcp6: false
+        #    optional: true
+
+        #    nameservers:
+        #        search: [ "firestorm.org", "ipsec-v4.firestorm.org", "ipsec-ipv6.firestorm.org" ]
+        #        addresses: [ 192.168.231.1, fc00:231::1 ]
+
+    ## This section is for a 4G modem, I will add this in a comming section, then we will uncomment these.
+    #modems:
+    #    cdc-wdm:
+    #        renderer: NetworkManager
+    #        apn: internet.tele2.se
+    #        #auto-config: true
+    #        #pin: 0000
+    #        dhcp4: true
+    #        dhcp6: true
+    #        #username: 
+    #        #password: 
+    #        match:
+    #            name: cdc-wdm*
 
 ```
 
@@ -474,49 +502,27 @@ $ sudo apt install dnsmasq dnsutils tcpdump -y
 $ sudo systemctl stop dnsmasq
 $ sudo systemctl stop hostapd
 ```
-Rename the dnsmasq.conf to old and start a new dnsmasq.conf file.
-```bash
-$ sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
-```
-
-Create a new dnsmasq.conf by adding the following common entries.
+#### Dnsmasq configuration instructions
+Edit /etc/dnsmasq.conf
 ```bash
 $ sudo nano /etc/dnsmasq.conf
 ```
+Find this line and make sure its not commented.
 ```bash
-    local=/localnet/
-
-    # exmple on howto re-route ntp dns requests to another network time protocol server.
-    #address=/ntp.org/193.11.166.2
-    #address=/time-ios.apple.com/193.11.166.2
-
-    addn-hosts=/etc/dnsmasq/hostile_hosts
-    
-    # example, you can add your own command to run when a client requests a dhcp entry.
-    dhcp-script=/bin/echo
-
-    srv-host=_ipp._tcp,printer.internal.firestorm.org,631
-    srv-host=_raw._tcp,printer.internal.firestorm.org,9100
-    txt-record=_http._tcp.printer.internal.firestorm.org,name=value,paper=A4
-
-    log-queries
-    log-dhcp
-
-    conf-dir=/etc/dnsmasq.d/,*.conf
-
+conf-dir=/etc/dnsmasq.d/,*.conf
 ```
-
-You can choose if you want this or not, if you already have a dhcp on your eth0 network, it would be unwise to add this.
+#### Dnsmasq eth0 configuration
+Create a new dnsmasq.d/10-eth0.conf by adding the following common entries.
 ```bash
-$ sudo nano /etc/eth0.conf
+$ sudo nano /etc/dnsmasq.d/10-eth0.conf
 ```
 ```bash
 server=1.1.1.1#53
 server=1.0.0.1#53
 
 interface=eth0
-listen-address=192.168.220.1
-listen-address=fc00:220::1
+listen-address=192.168.220.50
+listen-address=fc00:220::50
 #listen-address=fe80::1
 #port=53
 
@@ -563,15 +569,15 @@ enable-ra
 ########################################
 
 ```
-
-Add the following entries to your wlan0 wifi interface. You should do this.
+#### Dnsmasq wlan0 configuration
+Create a new dnsmasq.d/10-wlan0.conf by adding the following common entries.
 ```bash
-$ sudo nano /etc/wlan0.conf
+$ sudo nano /etc/dnsmasq.d/10-wlan0.conf
 ```
+
 ```bash
-# DNS forwarding
-server=1.1.1.1#53
-server=1.0.0.1#53
+server=1.1.1.3#53
+server=1.0.0.3#53
 
 interface=wlan0
 listen-address=192.168.230.1
@@ -580,6 +586,8 @@ listen-address=fc00:230::1
 #port=53
 
 local=/localnet/
+address=/ipsec.firestorm.org/192.168.230.1
+address=/ipsec.firestorm.org/fc00:230::1
 localise-queries
 no-resolv
 domain-needed
@@ -622,24 +630,65 @@ enable-ra
 ########################################
 
 ```
-
-I just wanted to make sure you have somewhere to blacklist domains. We will add more features for this in your nftables configuration.
-
+#### Dnsmasq script configuration
+Create a new /etc/dnsmasq.d/10-script.conf by adding the following common entries.
 ```bash
-$ sudo mkdir /etc/dnsmasq/
-$ sudo nano /etc/dnsmasq/hostile_hosts
+$ sudo nano /etc/dnsmasq.d/10-script.conf
+```
+```bash
+dhcp-script=/bin/echo
+```
+#### Dnsmasq logging configuration
+Create a new /etc/dnsmasq.d/10-logging.conf by adding the following common entries.
+```bash
+$ sudo nano /etc/dnsmasq.d/10-logging.conf
+```
+```bash
+log-queries
+log-dhcp
+```
+#### Dnsmasq ipsec0 configuration (optional at this point)
+Create a new /etc/dnsmasq.d/10-ipsec.conf by adding the following common entries.
+```bash
+$ sudo nano /etc/dnsmasq.d/10-ipsec0.conf
+```
+```bash
+server=1.1.1.1#53
+server=1.0.0.1#53
+
+interface=ipsec0
+listen-address=192.168.231.1
+listen-address=fc00:231::1
+#listen-address=fe80::1
+#port=53
+
+local=/localnet/
+localise-queries
+no-resolv
+domain-needed
+expand-hosts
+
+########################################
+## eth0                               ##
+########################################
+
+# IPv4
+domain=ipsec-ipv4.firestorm.org,192.168.231.0/24
+synth-domain=ipsec-ipv4.firestorm.org,192.168.231.0/24,device
+
+# IPv6
+domain=ipsec-ipv6.firestorm.org,fc00:231::/64
+synth-domain=ipsec-ipv6.firestorm.org,fc00:231::/64,device
+synth-domain=ipsec-ipv6.firestorm.org,fe80::/64,device
+
+########################################
+##                                    ##
+########################################
+
 ```
 
-```bash
-########################################
-## HOSTILE                            ##
-########################################
 
-# redirector examples
-# redirect url of choice to ip of choice
-127.0.0.1   *.hostile-web-server.com
 
-```
 Add static dns records for your dnsmasq installation.
 ```bash
 $ sudo nano /etc/hosts
