@@ -793,42 +793,40 @@ fc00:230::1     firestorm-cataclystic-0001.wireless-ipv6.firestorm.org ipsec.fir
 ```
 
 #### Enable forwarding for IPv4
-
-Enable traffic forwarding from your wlan0 card to eth0 physical network card.
+Enable IPv4 traffic forwarding on your network cards.
 ```bash
 $ sudo nano /etc/sysctl.conf
 ```
-
-Example: Find *net.ipv4.ip_forward* inside your *sysctl.conf* and set it to *1* to enable IPv4 forwarding.
 ```bash
 net.ipv4.ip_forward=1
 ```
 
 #### Enable forwarding for IPv6
-
-Disable traffic forwarding from your wlan0 card to eth0 physical network card.
+Enable IPv6 traffic forwarding on your network cards.
 ```bash
 $ sudo nano /etc/sysctl.conf
 ```
-Example: Find *net.ipv6.conf.all.forwarding* inside your *sysctl.conf* and set it to *1* to enable IPV6 forwarding.
 ```bash
 net.ipv6.conf.all.forwarding=1
 ```
 
-#### nftables
-To separate the wifi-network (192.168.230.0/24) from the transit-network (192.168.220.0/24), we need to add a network address translation (NAT). Thankfully we have nftables, who will do that for free.
+#### Enable nftables
+Yesterday, we entered rules in iptables. Today, its named nftables. It does the same, but much smarter.
 
-A **postrouting masquerade**, NAT, on the eth0 interface will translate one network to another by changing the source ip of a packet on its way out through the eth0 device. It will help route wifi traffic out towards the Internet, and infact keep state and translate traffic going back in. Again, for free.
+The nftables project has existed for 10 years and the documentation is just really poor. Trying ChatGPT and Google, I haven't found even one fully functional IPv4/IPv6 example, where IPv6 network actually works properly.
 
-#### Making a temporary network address translation (NAT) on your raspberry
-Add the following statement on your raspberry to start network address translation
-TODO
+This is my IPv4/IPv6 example, the full 4x4 and 6x6 wheel drive. Enjoy, and please remember my name.
 
-IMPORTANT; Although this is the correct way to do this, do note that the above statement is in no way permanent. If you turn the raspberry off or restart it, you will need to add this statement again.
+Allright, here are my subnets on the network cards. (.1 is the interface ip number on each subnet)
+* eth0    (IPv4: 192.168.220.0/24, IPv6: fc00:220::0/64, fe80::1/64)
+* wlan0   (IPv4: 192.168.230.0/24, IPv6: fc00:230::0/64, fe80::1/64)
+* ipsec0  (IPv4: 192.168.231.0/24, IPv6: fc00:231::0/64, fe80::1/64)
+* docker0 (IPv4: 172.16.0.0/16     IPv6: N/A                       )
+* wwan0   (IPv4: Unknown         , IPv6: Unknown                   )
+
+I want to acheive IPv4/IPv6 **postrouting masquerade** NAT between all the internal networks and address translation between those networks. I've made the IPv6 (fc00::/64) networks NAT too and internally and externally, just to proove a point. Obviously (fe80::/64) is link-local and those cannot be translated, ofcourse.
 
 #### Making a permanent network address translation (NAT) on your raspberry
-Networking and iptables on Linux is difficult subject for people who are not familiar with network configurations. In other words this section could work for you, or it could bring you a lot of headache. I'll try to keep this as simple and easy as possible and in each chapter from here, add more detail.
-
 Step 1: Add a /etc/nftables.conf configuration file, and add the following configuration
 
 ```bash
@@ -910,6 +908,10 @@ define NET_IPSEC1_V4      = { 192.168.232.0/24 }
 define NET_IPSEC1_V6      = { fc00:232::/64 }
 
 ########################################
+##                                    ##
+########################################
+
+########################################
 ## Your original configuraiton        ##
 ########################################
 
@@ -974,8 +976,8 @@ table inet firewall-filter {
 
                 type filter hook input priority 0; policy drop;
 
-                iifname $DEV_GLOBAL    jump firewall-inbound-wan
                 iifname $DEV_LOOPBACK  jump firewall-inbound-loopback
+                iifname $DEV_GLOBAL    jump firewall-inbound-wan
                 iifname $DEV_WIRELESS  jump firewall-inbound-wireless
                 iifname $DEV_PRIVATE   jump firewall-inbound-private
                 iifname $DEV_IPSEC0    jump firewall-inbound-ipsec0
@@ -988,6 +990,12 @@ table inet firewall-filter {
 
         chain blacklist-rejects {
                 log prefix "NFT-BLACKLIST-REJECT " level debug counter reject
+        }
+
+        chain firewall-inbound-loopback {
+                ct state invalid counter drop
+                ct state new,established,related counter accept
+                log prefix "NFT-INBOUND-LOOPBACK-DROP " level debug counter drop
         }
 
         chain firewall-inbound-wan {
@@ -1009,8 +1017,8 @@ table inet firewall-filter {
                 ct state new,untracked tcp flags syn tcp dport { 22, 80, 1433, 5900, 5901 } add @blacklist-ipv4 { ip  saddr timeout 6h } drop
                 ct state new,untracked tcp flags syn tcp dport { 22, 80, 1433, 5900, 5901 } add @blacklist-ipv6 { ip6 saddr timeout 6h } drop
 
-                ct state new,untracked tcp flags syn tcp dport { 80, 443, 8000, 8080, 8443, 9000, 9090, 9443 } limit rate over 2/second add @blacklist-ipv4 { ip  saddr timeout 5m } drop
-                ct state new,untracked tcp flags syn tcp dport { 80, 443, 8000, 8080, 8443, 9000, 9090, 9443 } add @malicious-ipv6 { ip6 saddr ct count over 3 } add @blacklist-ipv6 { ip6 saddr timeout 5m } drop
+                ct state new,untracked tcp flags syn tcp dport { 443, 8000, 8080, 8443, 9000, 9090, 9443 } limit rate over 2/second add @blacklist-ipv4 { ip  saddr timeout 5m } drop
+                ct state new,untracked tcp flags syn tcp dport { 443, 8000, 8080, 8443, 9000, 9090, 9443 } add @malicious-ipv6 { ip6 saddr ct count over 3 } add @blacklist-ipv6 { ip6 saddr timeout 5m } drop
 
                 ## enable IPSec traffic isakmp (UDP/500) and ipsec-t-nat (UDP/4500)
                 ## enable IPSec encapsulated security protocol (ESP).
@@ -1021,12 +1029,6 @@ table inet firewall-filter {
                 ip6 saddr $NET_UNSPECIFIED_V6 icmpv6 type { 130, 131 } accept
 
                 log prefix "NFT-INBOUND-WAN-DROP " level debug counter drop
-        }
-
-        chain firewall-inbound-loopback {
-                ct state invalid counter drop
-                ct state new,established,related counter accept
-                log prefix "NFT-INBOUND-LOOPBACK-DROP " level debug counter packets 0 bytes 0 drop
         }
 
         chain firewall-inbound-wireless {
@@ -1115,7 +1117,7 @@ table inet firewall-filter {
                 log prefix "NFT-INBOUND-IPSEC0-DROP " level debug counter drop
         }
 
-       chain firewall-forward {
+       chain firewall-forward-global {
 
                 type filter hook forward priority 0; policy drop;
 
@@ -1132,9 +1134,9 @@ table inet firewall-filter {
                 log prefix "NFT-FORWARD-DROP " level debug counter drop
         }
 
-        chain firewall-outbound {
+        chain firewall-outbound-global {
 
-                type filter hook output priority 0; policy accept;
+                type filter hook output priority 0; policy drop;
 
                 oifname $DEV_LOOPBACK  jump firewall-outbound-loopback
                 oifname $DEV_GLOBAL    jump firewall-outbound-wan
@@ -1298,7 +1300,30 @@ table inet firewall-nat {
 ```
 
 #### Troubleshooting
-TODO
+Check the configuration validity before restarting the nftables.service 
+```bash
+$ sudo nft -c -f /etc/nftables.conf
+```
+Tail the syslog for NFT- statements
+```bash
+$ tail -f /var/log/syslog
+```
+Enable nftables.service
+```bash
+$ sudo systemctl enable nftables.service
+```
+Start nftables.service
+```bash
+$ sudo systemctl start nftables.service
+```
+Restart nftables.service
+```bash
+$ sudo systemctl restart nftables.service
+```
+Stop nftables.service
+```bash
+$ sudo systemctl stop nftables.service
+```
 
 #### Summary
 The chapters until here has taken you all the way to get your Raspberry Pi up and running as a simple wifi accesspoint. We have added the dnsmasq configuration, with both dns-, dhcp-, hostnames- and added a quite advanced nftables configuration. As I wrote, nftables are somewhat complex for beginners, I promise we will be touching the nftables configuration in further chapters. From this point we will be securing the configurations.
